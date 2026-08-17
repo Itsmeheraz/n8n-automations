@@ -2,7 +2,8 @@
 
 Your 24/7 creative assistant that turns simple ideas into professional social media posts. It handles the design and writing, but never posts anything without your final "Thumbs Up" via Telegram.
 
-[Watch in Action](https://meherazhossain.com/#)
+🎥 [Watch on YouTube](https://www.youtube.com/@AutomateWithMeheraz)
+🔗 [View on Portfolio](https://meherazhossain.com/#)
 
 ## Overview
 
