@@ -2,7 +2,8 @@
 
 An autonomous monitoring agent that checks your websites around the clock, instantly alerts you on downtime, and sends a weekly AI-analyzed PDF report.
 
-[Watch in Action](https://meherazhossain.com/#)
+🎥 [Watch on YouTube]([YOUR_YOUTUBE_LINK](https://youtu.be/ium_fB8KcTQ?si=VTL3gt5pewFJgC26))
+🔗 [View on Portfolio](https://meherazhossain.com/#)
 
 ## Technical Logic & Workflow
 
