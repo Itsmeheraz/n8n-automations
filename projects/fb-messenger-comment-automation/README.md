@@ -2,7 +2,8 @@
 
 An autonomous Facebook Messenger AI agent that holds natural, human-like conversations with customers — answering product questions, sending images, checking stock, taking orders, and following up — while also replying to post comments and converting interested commenters into private inbox conversations.
 
-[Watch in Action](https://meherazhossain.com/#)
+🎥 [Watch on YouTube](https://www.youtube.com/@AutomateWithMeheraz)
+🔗 [View on Portfolio](https://meherazhossain.com/#)
 
 ## Overview
 
