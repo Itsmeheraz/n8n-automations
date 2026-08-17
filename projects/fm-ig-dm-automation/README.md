@@ -2,7 +2,8 @@
 
 A dual-platform AI agent that manages Facebook Messenger and Instagram DMs together — tracking offline conversations, capturing leads, and seamlessly handing off to a human when needed.
 
-[Watch in Action](https://meherazhossain.com/#)
+🎥 [Watch on YouTube](https://youtu.be/03yDXGt6U8s?si=zk0fnjPSsk8M3FkW)
+🔗 [View on Portfolio](https://meherazhossain.com/#)
 
 ## Technical Logic & Workflow
 
