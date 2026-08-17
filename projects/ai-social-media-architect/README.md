@@ -1,4 +1,4 @@
-# AI Social Media Architect
+# Social Media Content Post
 
 Your 24/7 creative assistant that turns simple ideas into professional social media posts. It handles the design and writing, but never posts anything without your final "Thumbs Up" via Telegram.
 
