@@ -2,7 +2,8 @@
 
 An end-to-end AI travel research agent that turns a simple trip form into a complete, personalized roadmap — flights, hotels, budget, activities, and local food — delivered straight to your inbox.
 
-[Watch in Action](https://meherazhossain.com/#)
+🎥 [Watch on YouTube](https://www.youtube.com/@AutomateWithMeheraz)
+🔗 [View on Portfolio](https://meherazhossain.com/#)
 
 ## Overview
 
