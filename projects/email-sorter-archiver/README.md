@@ -2,7 +2,8 @@
 
 An autonomous AI agent that reads, understands, and organizes your Gmail inbox in real-time — auto-archiving spam and promotions while surfacing what actually matters.
 
-[Watch in Action](https://meherazhossain.com/#)
+🎥 [Watch on YouTube](https://www.youtube.com/@AutomateWithMeheraz)
+🔗 [View on Portfolio](https://meherazhossain.com/#)
 
 ## Technical Logic & Workflow
 
