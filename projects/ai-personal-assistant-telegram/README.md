@@ -2,7 +2,8 @@
 
 A self-hosted personal AI assistant that manages emails, meetings, and daily tasks through Telegram — with a morning briefing so your day starts with full clarity.
 
-[Watch in Action](https://meherazhossain.com/#)
+🎥 [Watch on YouTube](https://youtu.be/ium_fB8KcTQ?si=50wBgT02hmYzzHA)
+🔗 [View on Portfolio](https://meherazhossain.com/#)
 
 ## Technical Logic & Workflow
 
