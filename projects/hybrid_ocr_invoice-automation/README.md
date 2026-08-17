@@ -2,7 +2,8 @@
 
 An intelligent invoice processing agent that detects duplicate files, handles both searchable and scanned PDFs, extracts structured data with AI, and keeps your invoice database updated automatically.
 
-[Watch in Action](https://meherazhossain.com/#)
+🎥 [Watch on YouTube](https://www.youtube.com/@AutomateWithMeheraz)
+🔗 [View on Portfolio](https://meherazhossain.com/#)
 
 ## Technical Logic & Workflow
 
