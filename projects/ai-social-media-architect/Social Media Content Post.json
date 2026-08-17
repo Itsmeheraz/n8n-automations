@@ -1,0 +1,1776 @@
+{
+  "name": "Social Media Content Post",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1120,
+        -160
+      ],
+      "id": "01da430f-7bd4-443d-8a9d-cade25b4e801",
+      "name": "Telegram Trigger",
+      "webhookId": "6fa6fa1d-6a3a-4512-9fad-b65d5d53c938",
+      "credentials": {
+        "telegramApi": {
+          "id": "5d8BHLTj7JN2r34W",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://platform.higgsfield.ai/higgsfield-ai/soul/standard",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Your API Key"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "name": "aspect_ratio",
+              "value": "1:1"
+            },
+            {
+              "name": "resolution",
+              "value": "720p"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        544,
+        704
+      ],
+      "id": "45c238c1-022d-4aa4-87d9-a7dd15f0bf69",
+      "name": "IMAGE GENERATION",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        704
+      ],
+      "id": "46eab904-dfe4-43cc-8b66-f3a0d386aeee",
+      "name": "Wait",
+      "webhookId": "45ae7392-7478-4cb1-9ffb-aef9b0f0b774",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "https://api.cloud.higgsfield.ai/v1/requests/{REQUEST_ID}/status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key YOUR_KEY_ID:YOUR_KEY_SECRET"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        992,
+        704
+      ],
+      "id": "132f21a1-3a4b-411d-8fac-bf9c8645b4ba",
+      "name": "GET IMAGE",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e28bbadf-cc15-4fd5-aca2-82ca9bf08dc1",
+              "name": "IDEA",
+              "value": "={{ $json.IDEA || $('Telegram Trigger').item.json.message.text || $json.textp }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        -32
+      ],
+      "id": "f36aac0c-a106-452a-b8cb-6a9d5fff046b",
+      "name": "MERGE"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Idea-1:{{ $json.output['Idea-1'] }}\nIdea-2:{{ $json.output['Idea-2'] }} ",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=**System Prompt:**\n\n**Role**: Professional Designer for Duolingo Study Abroad Campaign\n\n**Objective**: Take one of the generated ideas (passed from the content generation agent) and create a **design outline** for a **1080x1080 poster**. The design should be **professional**, **unique**, and reflect **human-made** creativity, not AI-generated patterns. The design concept should follow modern **graphic design principles** based on **real-life research**.\n\n### **Design Outline Structure**:\n1. **Understand the Idea**: Begin by thoroughly understanding the **key message** and **target audience** from the idea passed to you. Understand the **primary emotion or response** that the idea is trying to invoke (e.g., excitement, motivation, urgency, etc.).\n   \n2. **Design Inspiration**:\n   - Research current **trends** for **1080x1080 posters** related to the **study abroad** and **language learning** niche.\n   - Review thousands of **real-world designs** to understand what **works best visually** for **Duolingo** or similar products.\n   - Take inspiration from **professional design portfolios** and **high-quality marketing materials** (not AI-generated) to ensure the design feels **authentic** and **human-made**.\n\n3. **Design Concept**:\n   - **Layout**: Define the overall layout (e.g., **top to bottom** hierarchy, placement of **headline**, **message**, **call-to-action**, etc.).\n   - **Color Scheme**: Suggest a **color palette** that aligns with **Duolingo’s branding** (using their official colors or complementary shades that evoke excitement and trust).\n   - **Typography**: Choose **professional fonts** that are modern, clean, and legible. Avoid **overly complex fonts**. Use **bold** and **regular fonts** to highlight key points.\n   - **Images and Icons**: Suggest visuals like **Duolingo's logo**, **students using phones/laptops**, **study abroad imagery** (e.g., landmarks, maps), and **flags** of countries accepting Duolingo. The images should **blend seamlessly** into the design.\n   - **Spacing and Composition**: Focus on **balance** and **white space** to avoid clutter. Use a **grid structure** for alignment and a **clean design** to keep the poster easy to digest.\n\n4. **Key Elements**:\n   - **Headline**: Position the **headline prominently**, making sure it stands out. It should grab attention and be **simple** yet impactful (e.g., “Start your Duolingo journey today!”).\n   - **Message**: The body message should be **short, motivational**, and **benefit-driven**. Ensure the message **supports** the headline and guides the user through the design.\n   - **Call-to-Action (CTA)**: Place the CTA in a **clear, easily accessible location** (typically at the bottom or center of the design). Make it **actionable** (e.g., \"Start Now\" or \"Take the Test\").\n   - **Branding**: Ensure Duolingo’s **logo** and **brand elements** (color, font) are **integrated naturally** into the design.\n\n5. **Final Touches**:\n   - Ensure the design looks **authentic and professional**, like it was created by a **human designer**, not AI.\n   - The design should be **on-brand**, with a clear focus on **user engagement** and **clarity**.\n   - Double-check for **readability**, **alignment**, and overall **visual appeal**.\n\n### **Deliverables**:\n- Provide a **detailed outline** of the poster’s design concept.\n- Include **suggestions for visual elements**, **colors**, **typography**, and **image placement**.\n- The outline should reflect a **high-level professional design**—a concept that could be handed off to a human designer for final execution.\n\n---\n\n### **Why This Works**:\n1. **Human-Like Design**: By researching real-world designs and emphasizing professional elements, this process ensures the design feels **authentic** and not AI-generated.\n2. **Practical Approach**: The agent is tasked with **researching design trends**, ensuring that the design is based on **real user preferences** and **market needs**, not just AI assumptions.\n3. **Professional Outcome**: This system prompt ensures the generated design concept is **polished**, **user-focused**, and easily executable by a human designer.\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        192,
+        -32
+      ],
+      "id": "577b8e3a-e997-4211-b427-6baa2952bea4",
+      "name": "IMAGE PROMPT MASTER"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        496
+      ],
+      "id": "0846789d-bb08-45fc-97d3-ba5f127652d3",
+      "name": "OPEN AI",
+      "credentials": {
+        "openAiApi": {
+          "id": "rpgz2Tyouwf4uxXw",
+          "name": "AspiringLife (Paid)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "8137468147",
+        "file": "={{ $json.url }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        -32
+      ],
+      "id": "56bdf0d6-a73f-43d4-b2a4-05bbf15c3ec8",
+      "name": "SEND IMAGE",
+      "webhookId": "2033ee10-9d4a-455d-b585-98fc223bfd26",
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "5d8BHLTj7JN2r34W",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "8137468147",
+        "message": "Boss! Will i process this photo?",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        -32
+      ],
+      "id": "d2faf89b-d8f5-45b2-b896-b6a92709b32e",
+      "name": "WAITING FOR YES OR NO...",
+      "webhookId": "902d1a57-2afe-453b-808d-3b1d262867b8",
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "5d8BHLTj7JN2r34W",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=image prompt: {{ $('IMAGE PROMPT MASTER').item.json.output.prompt }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an elite multi-platform social media strategist and viral growth expert.\n\nYour role is to receive an IMAGE GENERATION PROMPT and generate 5 DIFFERENT optimized posts tailored specifically for:\n\n1. Facebook  \n2. Instagram  \n3. Twitter (X)  \n4. LinkedIn  \n5. YouTube Community  \n\nIMPORTANT RULES:\n- The user will provide an image/design prompt.\n- Do NOT describe the image prompt back.\n- Do NOT explain your reasoning.\n- Do NOT ask questions.\n- Output ONLY the posts.\n- Each platform’s post must match that platform’s tone, structure, and behavior style.\n- Each post must include optimized hashtags suited for that platform.\n- No generic copy-paste captions — each must feel native to its platform.\n\nPLATFORM-SPECIFIC REQUIREMENTS:\n\nFACEBOOK:\n- Conversational tone\n- Light storytelling or relatable hook\n- Call-to-action encouraging comments/shares\n- 8–15 relevant hashtags at the end\n\nINSTAGRAM:\n- Strong scroll-stopping hook (first line powerful)\n- Short punchy paragraphs with spacing\n- Engagement CTA (save, share, comment)\n- 15–25 optimized hashtags (broad + niche mix)\n- Hashtags placed at the bottom in one clean block\n\nTWITTER (X):\n- Concise and impactful\n- High-retention hook\n- May include 1–2 short lines max\n- 3–8 highly targeted hashtags\n- Optimized for repost potential\n\nLINKEDIN:\n- Professional tone\n- Insight-driven or value-focused angle\n- Authority-building language\n- Soft professional CTA\n- 5–10 industry-relevant hashtags\n\nYOUTUBE COMMUNITY:\n- Engaging and conversational\n- Question-driven or curiosity-based\n- Encourage voting/commenting\n- 5–15 relevant hashtags\n- Slightly casual but strategic tone\n\nHASHTAG RULES:\n- Lowercase only\n- No banned/spammy hashtags\n- Relevant to the theme of the image prompt\n- Mix of broad, medium, and niche tags\n- Platform-appropriate formatting\n\nFORMAT OUTPUT EXACTLY LIKE THIS:\n\nFACEBOOK:\n<post>\n\nINSTAGRAM:\n<post>\n\nTWITTER (X):\n<post>\n\nLINKEDIN:\n<post>\n\nYOUTUBE COMMUNITY:\n<post>\n\nDo not add explanations. Output only the five formatted posts."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        192,
+        240
+      ],
+      "id": "a3f4cdf0-ea36-4eb4-b52f-14b707547035",
+      "name": "PUKI (CONTENT+HASHTAG)",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"facebook\": \"facebook\",\n    \"instragram\": \"instragram\",\n    \"twitter\": \"twitter\",\n    \"linkedin\": \"linkedin\",\n    \"youtube_community\": \"youtube\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        496
+      ],
+      "id": "29f79563-fed7-4a72-a221-1788721016e9",
+      "name": "PLATFORM DIVIDEDER"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        736
+      ],
+      "id": "3758e978-78fb-47f8-a95b-87481010bb56",
+      "name": "OPENAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "rpgz2Tyouwf4uxXw",
+          "name": "AspiringLife (Paid)"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2512,
+        -16
+      ],
+      "id": "ca1cf70b-53b1-4574-9ac5-60112c07158a",
+      "name": "Wait1",
+      "webhookId": "db012bf5-a595-4123-9a8c-09654989d2c9"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5b5a6f51-1811-45c0-aa70-8625cf92f72d",
+                    "leftValue": "={{ $('PUKI (CONTENT+HASHTAG)').item.json.output.instragram }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "INSTRAGRAM"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "56099d48-4df1-496b-a378-a4722c63aca7",
+                    "leftValue": "={{ $('PUKI (CONTENT+HASHTAG)').item.json.output.facebook }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "FACEBOOK"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "dccd1239-ab47-4495-a2da-df2fc6333a57",
+                    "leftValue": "={{ $('PUKI (CONTENT+HASHTAG)').item.json.output.linkedin }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "LINKEDIN"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8c2c4e89-3137-4e4e-bca9-52b04f699d28",
+                    "leftValue": "={{ $('PUKI (CONTENT+HASHTAG)').item.json.output.twitter }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "TWITTER"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1728,
+        208
+      ],
+      "id": "47d4cf57-3a12-4ee4-8c12-f7222ceeaf22",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "url": "https://api.linkedin.com/v2/me",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_TOKEN"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        544,
+        480
+      ],
+      "id": "d4096a46-548e-4e80-a714-2769888ddf33",
+      "name": "GET APP ID",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkedin.com/v2/assets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "action",
+              "value": "registerUpload"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_ACCESS_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"registerUploadRequest\": {\n    \"recipes\": [\n      \"urn:li:digitalmediaRecipe:feedshare-image\"\n    ],\n    \"owner\": \"urn:li:person:YOUR_PROFILE_ID\",\n    \"serviceRelationships\": [\n      {\n        \"relationshipType\": \"OWNER\",\n        \"identifier\": \"urn:li:userGeneratedContent\"\n      }\n    ]\n  }\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        768,
+        480
+      ],
+      "id": "0610d6ec-49b1-4757-a614-81d4c22e7bfd",
+      "name": "IMAGE REGISTER",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "http://upload_url_from_above",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_ACCESS_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        992,
+        480
+      ],
+      "id": "780741df-56bb-46c9-b347-9922a67a76c1",
+      "name": "UPLOAD IMAGE",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v20.0/17841444098175057/media",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "image_url",
+              "value": "={{ $json.data.url }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $('PUKI (CONTENT+HASHTAG)').item.json.output.instragram }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1821e2f6-3a86-4828-90f5-4d3c5fdf277b",
+      "name": "GET CONTAINER ID",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2256,
+        -16
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "cIOXeJjjOObiWvyG",
+          "name": "Instragram - piku (access token)"
+        },
+        "facebookGraphApi": {
+          "id": "VuVMqjpGir5ySdIj",
+          "name": "INSTRAGRAM"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e933dac5-3650-47a3-a52a-32a0c4050f2c",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2720,
+        -16
+      ],
+      "id": "1d2df4fa-23f1-475d-8a9b-16b24520736e",
+      "name": "IS ID EXIST?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v20.0/17841444098175057/media_publish",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "creation_id",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "access_token",
+              "value": "Your Access Token"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2960,
+        -32
+      ],
+      "id": "705f917e-c53b-41d0-b4a5-997911405938",
+      "name": "INSTRAGRAM POST"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v24.0/716487288208339/photos",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "={{ $('PUKI (CONTENT+HASHTAG)').item.json.output.facebook }}"
+            },
+            {
+              "name": "url",
+              "value": "={{ $json.data.url }}"
+            },
+            {
+              "name": "access_token",
+              "value": "Your Access Token"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2256,
+        224
+      ],
+      "id": "0ebfbf72-7886-4cd9-8192-4fa1fa1b6ee0",
+      "name": "FB POST"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkedin.com/v2/ugcPosts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_ACCESS_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"author\": \"urn:li:person:YOUR_PROFILE_ID\",\n  \"lifecycleState\": \"PUBLISHED\",\n  \"specificContent\": {\n    \"com.linkedin.ugc.ShareContent\": {\n      \"shareCommentary\": {\n        \"text\": \"YOUR_CAPTION\"\n      },\n      \"shareMediaCategory\": \"IMAGE\",\n      \"media\": [\n        {\n          \"status\": \"READY\",\n          \"asset\": \"ASSET_FROM_ABOVE\"\n        }\n      ]\n    }\n  },\n  \"visibility\": {\n    \"com.linkedin.ugc.MemberNetworkVisibility\": \"PUBLIC\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1216,
+        480
+      ],
+      "id": "14b269a9-295c-4aec-b91e-ca6c096f7782",
+      "name": "LINKEDIN POST",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        2256,
+        480
+      ],
+      "id": "1673bf82-f913-4df3-a98f-613dead3dbd3",
+      "name": "Create a post",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://upload.twitter.com/1.1/media/upload.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth1Api",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "media"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2256,
+        672
+      ],
+      "id": "24e7908b-79cd-4abf-994c-b350c3b957bf",
+      "name": "IMAGE UPLOAD",
+      "credentials": {
+        "oAuth1Api": {
+          "id": "KicLTM0f9Yw4wOUk",
+          "name": "X (ASPIRING)"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twitter.com/2/tweets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth1Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"text\": \"YOUR_CAPTION\",\n  \"media\": {\n    \"media_ids\": [\n      \"MEDIA_ID_FROM_STEP1\"\n    ]\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2464,
+        672
+      ],
+      "id": "8162e682-e6b9-4479-af58-e8c75bcd001e",
+      "name": "X POST",
+      "credentials": {
+        "oAuth1Api": {
+          "id": "KicLTM0f9Yw4wOUk",
+          "name": "X (ASPIRING)"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "9c4e8c25e143c50251c5f785def78a70"
+            },
+            {
+              "name": "image",
+              "value": "={{ $('CONVERT BASE64').item.json.data }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1440,
+        240
+      ],
+      "id": "349b5a98-16d4-46f6-b9a4-0806e6e88551",
+      "name": "IMAGE UPLOAD FOR LINK"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        240
+      ],
+      "id": "c20aea0c-45f7-4159-acd4-2ba3f425d033",
+      "name": "CONVERT BASE64"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('GENERATE IMAGE').item.json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        544,
+        240
+      ],
+      "id": "fdd070c0-4371-4097-b812-09470f0c7cec",
+      "name": "DOWNLAOD IMAGE"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b895ad32-e68d-46bd-b270-5c09d1d00704",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1216,
+        -32
+      ],
+      "id": "2c91d799-252a-4d3d-98f3-cb33b02ec8af",
+      "name": "IS APPROVED?",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        992,
+        240
+      ],
+      "id": "e733b086-0e2c-4b60-88ee-a9e6899ea143",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "name": "data",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1o8lLKsY4CZY5alx6jw50Db5haQ3hIWlg",
+          "mode": "list",
+          "cachedResultName": "SOCIEL MEDIA PLATFORM",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/your folder id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1216,
+        240
+      ],
+      "id": "1dc24d6b-39c2-47e9-a6ed-fe362af0551d",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "1u8KdeQ8sNyfmQFQ",
+          "name": "GOOGLE DRIVE (PERSONAL)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1A3ujuqsJLQFDpfOopIcxb_LynFd3Gpezq6Q262cECUg",
+          "mode": "list",
+          "cachedResultName": "SOCIEL MEDIA POST",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your_spreadsheet_id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "ALL PLATFORM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your_spreadsheet_id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "IDEA": "={{ $('Google Sheets Trigger').item.json.IDEA }}",
+            "FACEBOOK": "={{ $('PUKI (CONTENT+HASHTAG)').item.json.output.facebook }}",
+            "INSTRAGRAM": "={{ $('PUKI (CONTENT+HASHTAG)').item.json.output.instragram }}",
+            "TWITTER": "={{ $('PUKI (CONTENT+HASHTAG)').item.json.output.twitter }}",
+            "LINKEDIN": "={{ $('PUKI (CONTENT+HASHTAG)').item.json.output.linkedin }}",
+            "YOUTUBE COMMUNITY": "={{ $('PUKI (CONTENT+HASHTAG)').item.json.output.youtube_community }}",
+            "TRIGGER ": "DONE",
+            "IMAGE LINK": "={{ $json.data.url }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "IDEA",
+              "displayName": "IDEA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "FACEBOOK",
+              "displayName": "FACEBOOK",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "INSTRAGRAM",
+              "displayName": "INSTRAGRAM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LINKEDIN",
+              "displayName": "LINKEDIN",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TWITTER",
+              "displayName": "TWITTER",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "YOUTUBE COMMUNITY",
+              "displayName": "YOUTUBE COMMUNITY",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "IMAGE LINK",
+              "displayName": "IMAGE LINK",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TRIGGER ",
+              "displayName": "TRIGGER ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3456,
+        256
+      ],
+      "id": "0f283b7e-8613-460f-810d-7ba79eb5edf9",
+      "name": "UPLOAD GOOGLE SHEET",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XZ3GAlnC2vAbgHaN",
+          "name": "PERSONAL (GOOGLE SHEET)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3296,
+        224
+      ],
+      "id": "d7b1950c-b084-420f-b7e5-c518ea06b14c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 18
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1120,
+        80
+      ],
+      "id": "3417f874-5a92-49fb-a670-8c9063029149",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1A3ujuqsJLQFDpfOopIcxb_LynFd3Gpezq6Q262cECUg",
+          "mode": "list",
+          "cachedResultName": "SOCIEL MEDIA POST",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1A3ujuqsJLQFDpfOopIcxb_LynFd3Gpezq6Q262cECUg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "ALL PLATFORM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1A3ujuqsJLQFDpfOopIcxb_LynFd3Gpezq6Q262cECUg/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "TRIGGER ",
+              "lookupValue": "GENERATE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -896,
+        80
+      ],
+      "id": "bdea6ae2-ef8f-46b3-a3f7-6ac6fd4dcd76",
+      "name": "CHOOSE TO POST",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XZ3GAlnC2vAbgHaN",
+          "name": "PERSONAL (GOOGLE SHEET)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# IDEATION & INPUT\n### - Get Initial Concept & Gather Input Data\n",
+        "height": 512,
+        "width": 976,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1168,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "f95c21c5-75b2-4dee-9ac9-83e57ed3652a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# CONTENT PIPELINE\n### - Image Generation\n### - Hold for Human Approved\n### - Post Caption Generation\n### - Upload to Google Drive for Storage\n",
+        "height": 1136,
+        "width": 976,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        112,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "534c77f0-2972-4211-a38c-6458bc673b18",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# SOCIAL PUBLISHING\n### Final Approved Content (Image with text) is \n### Distributed to All Selected Social Platform..\n### - Facebook \n### - Instragram \n### - Linkedine\n### - X/Twitter\n\n",
+        "height": 1136,
+        "width": 1744,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1888,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "51ad4cd6-fca4-4e94-9481-1e3e1775844b",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        80
+      ],
+      "id": "2f276da5-dc24-4ddc-bac8-3c5111db3f70",
+      "name": "POST LIMIT"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "134f77fe-15dc-4a73-b8dc-660e26667923",
+              "leftValue": "={{ $json.message.voice.mime_type }}",
+              "rightValue": "audio",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -896,
+        -160
+      ],
+      "id": "5a3c0417-1d98-4246-b26f-ddb991e0871e",
+      "name": "IS IT AUDIO OR TEXT?"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -672,
+        -240
+      ],
+      "id": "df9f0440-82f0-445f-9760-cf722c490f24",
+      "name": "GET AUDIO",
+      "webhookId": "e28c9569-a4bc-4e13-b2b9-f3a0602e10c2",
+      "credentials": {
+        "telegramApi": {
+          "id": "5d8BHLTj7JN2r34W",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -480,
+        -240
+      ],
+      "id": "b8bedd9e-8a4c-416a-896b-74c22aca12ef",
+      "name": "TRANSCRIBE AUDIO",
+      "credentials": {
+        "openAiApi": {
+          "id": "rpgz2Tyouwf4uxXw",
+          "name": "AspiringLife (Paid)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "=1. Understand the Idea:\\n- Key Message: Duolingo offers an international language test online in just 1 hour, convenient, fast, and accessible anytime, anywhere.\\n- Target Audience: Bengali-speaking students and professionals interested in quick, reliable language certification to study or work abroad.\\n- Primary Emotion: Urgency mixed with motivation and trust; inspire action through ease and speed.\\n\\n2. Design Inspiration:\\n- Modern study abroad posters often use clean layouts, bright Duolingo green balanced with white and accents of complementary warm colors.\\n- Use real, diverse student imagery interacting with devices to show convenience and accessibility.\\n- Visual cues such as clocks or minimal hourglass icons to communicate 'just 1 hour'.\\n- Incorporate subtle international symbols like simplified landmarks or small, faint flags in backgrounds for global reach.\\n\\n3. Design Concept:\\n- Layout: Vertical top-to-bottom hierarchy.\\n  - Top: Bold headline in Bengali script anchored at the top third.\\n  - Middle: Motivational message in 2-3 short bullet lines or stacked text blocks.\\n  - Bottom: Call-to-Action in a bright button-style container.\\n  - Floating Duolingo mascot subtly placed near headline or CTA to enhance brand presence.\\n- Color Scheme: \\n  - Primary: Duolingo green (#78C800) for headlines and highlights.\\n  - Secondary: White background for cleanliness.\\n  - Accent: Warm yellow (#FFDD44) or soft orange for CTA backgrounds to evoke urgency and energy.\\n  - Text: Dark grey (#333) for content for readability.\\n- Typography:\\n  - Headline: A modern sans-serif Bengali font, bold weight, large size.\\n  - Body Message: Clean sans-serif Bengali font, regular weight, comfortably sized for legibility.\\n  - CTA: Bold sans-serif in white on colored button.\\n- Images and Icons:\\n  - Primary image: Friendly, relatable Bengali student or diverse young adult using phone/laptop.\\n  - Small icon of a clock next to \"১ ঘন্টায়\" phrase.\\n  - Background faint illustrations of global landmarks (e.g., Eiffel Tower, Statue of Liberty, etc.) or simplified maps.\\n  - Duolingo owl mascot discreet in corner or near CTA.\\n\\n4. Key Elements:\\n- Headline: \"Duolingo: অনলাইনে শুধু মাত্র ১ ঘন্টায় আন্তর্জাতিক ভাষা পরীক্ষা\" at top, large, eye-catching.\\n- Message:\\n  - \"এখন তাড়াতাড়ি প্রিপেয়ার্ড হতে পারবেন!\"\\n  - \"কোনও অপ্রয়োজনীয় দেবে না!\"\\n  - \"যে কোন স্থান থেকে যে কোন সময়ে পরীক্ষা দিতে পারবেন।\"\\n  Placed centrally with good line spacing.\\n- CTA:\\n  - Text: \"এখনই Duolingo পরীক্ষা দিন আর আপনার গন্তব্যে এক ধাপ নেমে রঙিন স্বপ্ন চরম সীমা ছুঁয়ে যান।\"\\n  - Positioned at bottom in a full-width or centered button with warm color (yellow/orange).\\n- Branding:\\n  - Duolingo logo placed subtly near the bottom or top right with enough white space.\\n  - Maintain brand color usage consistent with Duolingo’s guidelines.\\n\\n5. Final Touches:\\n- Use sufficient white space around text blocks to avoid clutter.\\n- Align all text left or center based on Bengali reading preferences.\\n- Ensure all elements are balanced visually.\\n- Contrast between text and background to maintain readability.\\n- The overall look must feel inviting, motivating, and professional with human-crafted typography and imagery.\\n\\nThis design outline is intended for a professional Bengali-language poster to motivate quick registration and participation in Duolingo’s international language test, emphasizing simplicity, speed, and accessibility with strong brand identity.",
+        "options": {
+          "size": "1024x1024"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        -32
+      ],
+      "id": "22731eae-3adc-4a58-bebb-af7ea8c6704d",
+      "name": "GENERATE IMAGE",
+      "credentials": {
+        "openAiApi": {
+          "id": "rpgz2Tyouwf4uxXw",
+          "name": "AspiringLife (Paid)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"prompt\": \"\",\n\t\"aspect_ratio\": \"\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        736
+      ],
+      "id": "731d93a4-7d7c-46f9-a98d-0c1cd3d370d0",
+      "name": "DATA PARSE"
+    }
+  ],
+  "pinData": {
+    "GET CONTAINER ID": [
+      {
+        "json": {
+          "id": "18054390989469940"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "IMAGE PROMPT MASTER": [
+      {
+        "json": {
+          "output": {
+            "prompt": "1. Understand the Idea:\n- Key Message: Duolingo offers an international language test online in just 1 hour, convenient, fast, and accessible anytime, anywhere.\n- Target Audience: Bengali-speaking students and professionals interested in quick, reliable language certification to study or work abroad.\n- Primary Emotion: Urgency mixed with motivation and trust; inspire action through ease and speed.\n\n2. Design Inspiration:\n- Modern study abroad posters often use clean layouts, bright Duolingo green balanced with white and accents of complementary warm colors.\n- Use real, diverse student imagery interacting with devices to show convenience and accessibility.\n- Visual cues such as clocks or minimal hourglass icons to communicate 'just 1 hour'.\n- Incorporate subtle international symbols like simplified landmarks or small, faint flags in backgrounds for global reach.\n\n3. Design Concept:\n- Layout: Vertical top-to-bottom hierarchy.\n  - Top: Bold headline in Bengali script anchored at the top third.\n  - Middle: Motivational message in 2-3 short bullet lines or stacked text blocks.\n  - Bottom: Call-to-Action in a bright button-style container.\n  - Floating Duolingo mascot subtly placed near headline or CTA to enhance brand presence.\n- Color Scheme: \n  - Primary: Duolingo green (#78C800) for headlines and highlights.\n  - Secondary: White background for cleanliness.\n  - Accent: Warm yellow (#FFDD44) or soft orange for CTA backgrounds to evoke urgency and energy.\n  - Text: Dark grey (#333) for content for readability.\n- Typography:\n  - Headline: A modern sans-serif Bengali font, bold weight, large size.\n  - Body Message: Clean sans-serif Bengali font, regular weight, comfortably sized for legibility.\n  - CTA: Bold sans-serif in white on colored button.\n- Images and Icons:\n  - Primary image: Friendly, relatable Bengali student or diverse young adult using phone/laptop.\n  - Small icon of a clock next to \"১ ঘন্টায়\" phrase.\n  - Background faint illustrations of global landmarks (e.g., Eiffel Tower, Statue of Liberty, etc.) or simplified maps.\n  - Duolingo owl mascot discreet in corner or near CTA.\n\n4. Key Elements:\n- Headline: \"Duolingo: অনলাইনে শুধু মাত্র ১ ঘন্টায় আন্তর্জাতিক ভাষা পরীক্ষা\" at top, large, eye-catching.\n- Message:\n  - \"এখন তাড়াতাড়ি প্রিপেয়ার্ড হতে পারবেন!\"\n  - \"কোনও অপ্রয়োজনীয় দেবে না!\"\n  - \"যে কোন স্থান থেকে যে কোন সময়ে পরীক্ষা দিতে পারবেন।\"\n  Placed centrally with good line spacing.\n- CTA:\n  - Text: \"এখনই Duolingo পরীক্ষা দিন আর আপনার গন্তব্যে এক ধাপ নেমে রঙিন স্বপ্ন চরম সীমা ছুঁয়ে যান।\"\n  - Positioned at bottom in a full-width or centered button with warm color (yellow/orange).\n- Branding:\n  - Duolingo logo placed subtly near the bottom or top right with enough white space.\n  - Maintain brand color usage consistent with Duolingo’s guidelines.\n\n5. Final Touches:\n- Use sufficient white space around text blocks to avoid clutter.\n- Align all text left or center based on Bengali reading preferences.\n- Ensure all elements are balanced visually.\n- Contrast between text and background to maintain readability.\n- The overall look must feel inviting, motivating, and professional with human-crafted typography and imagery.\n\nThis design outline is intended for a professional Bengali-language poster to motivate quick registration and participation in Duolingo’s international language test, emphasizing simplicity, speed, and accessibility with strong brand identity.",
+            "aspect_ratio": "1:1"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "IS IT AUDIO OR TEXT?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IMAGE GENERATION": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "GET IMAGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE": {
+      "main": [
+        [
+          {
+            "node": "IMAGE PROMPT MASTER",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IMAGE PROMPT MASTER": {
+      "main": [
+        [
+          {
+            "node": "GENERATE IMAGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OPEN AI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "IMAGE PROMPT MASTER",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEND IMAGE": {
+      "main": [
+        [
+          {
+            "node": "WAITING FOR YES OR NO...",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WAITING FOR YES OR NO...": {
+      "main": [
+        [
+          {
+            "node": "IS APPROVED?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PUKI (CONTENT+HASHTAG)": {
+      "main": [
+        [
+          {
+            "node": "DOWNLAOD IMAGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PLATFORM DIVIDEDER": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "PUKI (CONTENT+HASHTAG)",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OPENAI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "PUKI (CONTENT+HASHTAG)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "IS ID EXIST?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "GET CONTAINER ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FB POST",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IMAGE UPLOAD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET APP ID": {
+      "main": [
+        [
+          {
+            "node": "IMAGE REGISTER",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IMAGE REGISTER": {
+      "main": [
+        [
+          {
+            "node": "UPLOAD IMAGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPLOAD IMAGE": {
+      "main": [
+        [
+          {
+            "node": "LINKEDIN POST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET CONTAINER ID": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IS ID EXIST?": {
+      "main": [
+        [
+          {
+            "node": "INSTRAGRAM POST",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GET CONTAINER ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FB POST": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "LINKEDIN POST": {
+      "main": [
+        []
+      ]
+    },
+    "IMAGE UPLOAD": {
+      "main": [
+        [
+          {
+            "node": "X POST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IMAGE UPLOAD FOR LINK": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CONVERT BASE64": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DOWNLAOD IMAGE": {
+      "main": [
+        [
+          {
+            "node": "CONVERT BASE64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IS APPROVED?": {
+      "main": [
+        [
+          {
+            "node": "PUKI (CONTENT+HASHTAG)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GENERATE IMAGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "IMAGE UPLOAD FOR LINK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPLOAD GOOGLE SHEET": {
+      "main": [
+        []
+      ]
+    },
+    "INSTRAGRAM POST": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a post": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "X POST": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "UPLOAD GOOGLE SHEET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "CHOOSE TO POST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CHOOSE TO POST": {
+      "main": [
+        [
+          {
+            "node": "POST LIMIT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST LIMIT": {
+      "main": [
+        [
+          {
+            "node": "MERGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IS IT AUDIO OR TEXT?": {
+      "main": [
+        [
+          {
+            "node": "GET AUDIO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MERGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET AUDIO": {
+      "main": [
+        [
+          {
+            "node": "TRANSCRIBE AUDIO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TRANSCRIBE AUDIO": {
+      "main": [
+        [
+          {
+            "node": "MERGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GENERATE IMAGE": {
+      "main": [
+        [
+          {
+            "node": "SEND IMAGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DATA PARSE": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "IMAGE PROMPT MASTER",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "11b3a51a-b449-4839-908f-f9d4ddeb8c6f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "20cf75cd0417fe5be3c3d8dcf7163bcd4dd5f0947193527bf3d55f850ac76577"
+  },
+  "nodeGroups": [],
+  "id": "9YVQI2PJrXatT0wM",
+  "tags": []
+}
