@@ -1,0 +1,1237 @@
+{
+  "name": "Hybrid OCR Invoice Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1ZznsZBahsH5miK3C3vFVP1PIjISaKc-L",
+          "mode": "list",
+          "cachedResultName": "INVOICE",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1ZznsZBahsH5miK3C3vFVP1PIjISaKc-L"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "id": "478aa36e-3969-4683-9c54-542fbb413732",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        304,
+        320
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "MfGeckVMgDOpVXAG",
+          "name": "Google Drive"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Invoice Number: {{ $('Information Extractor').item.json.output['Invoice Number'] }}\n\nClient Name: {{ $('Information Extractor').item.json.output['Client Name'] }}\n\nClient Email: {{ $('Information Extractor').item.json.output['Client Email'] }}\n\nTotal Amount: {{ $('Information Extractor').item.json.output['Total Amount'] }}\n\nInvoice Date: {{ $('Information Extractor').item.json.output['Invoice Date'] }}\n\nDue Date: {{ $('Information Extractor').item.json.output['Due Date'] }}"
+            },
+            {
+              "content": "=# Overview\nYou are an email expert for Nexora Labs named Nex. You will receive invoice information. Your job is to notify the internal billing team that an invoice was received/sent.\n\n## Email\nInform the billing team of the invoice. Let them know we have also updated this in the Invoice Database, and they can view it here: https://drive.google.com/open?id={{ $('Google Drive Trigger').item.json.id }}\n\n## Output\nOutput the following parameters separately:\nSubject\nEmail",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "db5f8f8a-9ce1-4613-8daa-9fb1dfd064d6",
+      "name": "Create Email",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        3904,
+        400
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "ooVjyN817w2eFPAh",
+          "name": "OpenAI (Inmetech)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "billing@example.com",
+        "subject": "={{ $json.message.content.Subject }}",
+        "emailType": "text",
+        "message": "={{ $json.message.content.Email }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "d87a6a79-9d4b-4a2f-9756-84499378bbb7",
+      "name": "Send Email",
+      "webhookId": "da2aa524-25e5-47e2-bd1a-fe7a97edf8a7",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        4208,
+        400
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "34264a55-fbb1-4426-be46-e14e47adc6db",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        4800,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "827740a1-324f-464d-b0d6-1d5c83178a29",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        3312,
+        560
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "ooVjyN817w2eFPAh",
+          "name": "OpenAI (Inmetech)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1wni583ZliqRQV_Eikb9bmO5kgUGTSwtOFZ6Q-IHmm24",
+          "mode": "list",
+          "cachedResultName": "INVOICE DETAILS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wni583ZliqRQV_Eikb9bmO5kgUGTSwtOFZ6Q-IHmm24/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17VNFnLeIi_cSuACyT3vFrifHMiKNNUdkkUNqE9smAhQ/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "File ID",
+              "lookupValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "21691694-62bb-46d5-bd34-a7044bf906bc",
+      "name": "GET DETAILS",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "alwaysOutputData": true,
+      "position": [
+        608,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c273bb23-4698-47f1-9c05-137e5824b23a",
+              "leftValue": "={{ $json['File ID'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "21877804-3738-4930-b230-91f9b6df0563",
+      "name": "IS THIS DETAILS EXIST?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.text || '';\nconst trimmed = text.trim();\n\n// Check 1: একেবারে খালি বা খুব ছোট\nconst tooShort = trimmed.length < 30;\n\n// Check 2: Readable character ratio (garbage/broken encoding হলে এখানে ধরা পড়বে)\nconst alphaNumeric = (trimmed.match(/[a-zA-Z0-9]/g) || []).length;\nconst readableRatio = trimmed.length > 0 ? alphaNumeric / trimmed.length : 0;\nconst looksGarbled = readableRatio < 0.3;\n\n// Check 3: Expected keyword presence (invoice হলে এই ধরনের word থাকারই কথা)\nconst expectedKeywords = ['invoice', 'amount', 'total', 'date', 'bill'];\nconst hasExpectedKeyword = expectedKeywords.some(k => \n  trimmed.toLowerCase().includes(k)\n);\n\n// Check 4: Repeated/looping garbage pattern (কিছু bad PDF extract এ একই character বারবার আসে)\nconst suspiciousRepeat = /(.)\\1{20,}/.test(trimmed);\n\n// Final decision\nconst needsVisionFallback = tooShort || looksGarbled || suspiciousRepeat || !hasExpectedKeyword;\n\nreturn {\n  json: {\n    ...$json,\n    extraction_confidence: needsVisionFallback ? 'low' : 'high',\n    needs_vision_fallback: needsVisionFallback,\n    debug_reason: tooShort ? 'too_short' : looksGarbled ? 'garbled' : suspiciousRepeat ? 'repeated_chars' : !hasExpectedKeyword ? 'no_keywords' : 'ok'\n  }\n};"
+      },
+      "id": "6ccae9f1-ed2c-4713-9e43-7d8bf09f278b",
+      "name": "CHECK DATA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// DOWNLOAD BINARY নোড থেকে বাইনারি ডাটা টেনে আনবে\nconst downloadNodeBinary = $('DOWNLOAD BINARY').first().binary;\n\nreturn [\n  {\n    json: {\n      ...$input.item.json, // বর্তমান JSON মেটাডেটা থাকবে\n    },\n    binary: {\n      ...downloadNodeBinary // আগের নোড থেকে আসল PDF/Binary ফাইল চলে আসবে\n    }\n  }\n];"
+      },
+      "id": "570340cb-d194-4e04-a438-c2fcdd0bf341",
+      "name": "GET BINARY",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Google Drive Trigger').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "bbf8bfec-a88f-435d-9e75-87014c58986c",
+      "name": "DOWNLOAD BINARY",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1200,
+        400
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "MfGeckVMgDOpVXAG",
+          "name": "Google Drive"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "69cffff1-3c2d-4e59-8404-7445496aea63",
+      "name": "EXTRACT FROM FILE",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.ParsedResults[0].ParsedText }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Invoice Number",
+              "description": "The number of the invoice",
+              "required": true
+            },
+            {
+              "name": "Client Name",
+              "description": "the name of the client",
+              "required": true
+            },
+            {
+              "name": "Client Email",
+              "description": "the email of the client",
+              "required": true
+            },
+            {
+              "name": "Client Address",
+              "description": "the address of the client",
+              "required": true
+            },
+            {
+              "name": "Client Phone",
+              "description": "the phone number of the client",
+              "required": true
+            },
+            {
+              "name": "Total Amount",
+              "description": "the total amount of the invoice",
+              "required": true
+            },
+            {
+              "name": "Invoice Date",
+              "type": "date",
+              "description": "the date the invoice was sent",
+              "required": true
+            },
+            {
+              "name": "Due Date",
+              "type": "date",
+              "description": "the date the invoice is due",
+              "required": true
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value."
+        }
+      },
+      "id": "21725fc9-1490-406d-8442-8cc1cdb21144",
+      "name": "Information Extractor",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        3312,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "744def37-9979-44c2-b062-08bbfede7d28",
+              "name": "validation_status",
+              "value": "={{ $json.output['Invoice Number'] && $json.output['Total Amount'] ? 'SUCCESS' : 'FAILED' }}",
+              "type": "string"
+            },
+            {
+              "id": "853ba15c-e76b-45b0-bc65-217fe431ed3e",
+              "name": "processed_at",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8a56e97d-01f8-4c8f-809a-cfa03628d5d8",
+      "name": "APPEND DATA",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        3600,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wni583ZliqRQV_Eikb9bmO5kgUGTSwtOFZ6Q-IHmm24",
+          "mode": "list",
+          "cachedResultName": "INVOICE DETAILS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wni583ZliqRQV_Eikb9bmO5kgUGTSwtOFZ6Q-IHmm24/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wni583ZliqRQV_Eikb9bmO5kgUGTSwtOFZ6Q-IHmm24/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Invoice Number": "={{ $('Information Extractor').item.json.output['Invoice Number'] }}",
+            "Client Name": "={{ $('Information Extractor').item.json.output['Client Name'] }}",
+            "Email": "={{ $('Information Extractor').item.json.output['Client Email'] }}",
+            "Phone Number": "={{ $('Information Extractor').item.json.output['Client Phone'] }}",
+            "Address": "={{ $('Information Extractor').item.json.output['Client Address'] }}",
+            "Total Amount": "={{ $('Information Extractor').item.json.output['Total Amount'] }}",
+            "Invoice Date": "={{ $('Information Extractor').item.json.output['Invoice Date'] }}",
+            "Due Date": "={{ $('Information Extractor').item.json.output['Due Date'] }}",
+            "File ID": "={{ $('Google Drive Trigger').item.json.id }}",
+            "Validation Status": "={{ $('APPEND DATA').item.json.validation_status }}",
+            "Processed At": "={{ $('APPEND DATA').item.json.processed_at }}",
+            "Email Sent": "Yes"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "File ID",
+              "displayName": "File ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Amount",
+              "displayName": "Total Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Validation Status",
+              "displayName": "Validation Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Processed At",
+              "displayName": "Processed At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Sent",
+              "displayName": "Email Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "453b497d-b396-448c-a1f3-2e187721df29",
+      "name": "UPDATE IN DATABASE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        4512,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "98997768-32f6-45f3-b0ce-531da36d5932",
+      "name": "No Operation, do nothing1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "2a09d236-aa26-4723-84ea-2492141dbcd9",
+      "name": "EXTRACT TEXT",
+      "type": "n8n-nodes-base.mistralAi",
+      "typeVersion": 1,
+      "position": [
+        2688,
+        320
+      ],
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "3nCHM543YIxEPVgg",
+          "name": "Mistral"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "9d810a32-441e-4d75-a62a-e6c41afe98bd",
+      "name": "MERGE",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3008,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e7b8d91e-2170-4b17-9746-b46d154812ea",
+              "leftValue": "={{ $json.needs_vision_fallback }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b3edaf0d-7a35-47bd-90c1-93e8efc11387",
+      "name": "IS TEXT EXTRACTED?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2112,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1. FILE & STORAGE\n\nGoogle Drive Trigger, GET DETAILS, IS THIS DETAILS EXIST?, DOWNLOAD BINARY, No Operation, do nothing1",
+        "height": 370,
+        "width": 1220,
+        "color": 4
+      },
+      "name": "Section 1: FILE & STORAGE",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        128
+      ],
+      "id": "0bc42891-ecdf-4d4b-8e00-f82e803a90ed"
+    },
+    {
+      "parameters": {
+        "content": "## 2. DATA PROCESSING\n\nCHECK DATA, GET BINARY, EXTRACT FROM FILE, IS TEXT EXTRACTED?",
+        "height": 290,
+        "width": 1220,
+        "color": 4
+      },
+      "name": "Section 2: DATA PROCESSING",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        208
+      ],
+      "id": "00a95201-474c-4ea5-906b-8f09613c6e8b"
+    },
+    {
+      "parameters": {
+        "content": "## 3. DATA PROCESSING\n\nInformation Extractor, APPEND DATA, EXTRACT TEXT, MERGE",
+        "height": 450,
+        "width": 1220,
+        "color": 4
+      },
+      "name": "Section 3: DATA PROCESSING",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2672,
+        208
+      ],
+      "id": "e9b74b37-7442-4f14-bd26-017764c896fc"
+    },
+    {
+      "parameters": {
+        "content": "## 4. AI PROCESSING\n\nCreate Email, Send Email, No Operation, do nothing, UPDATE IN DATABASE",
+        "height": 210,
+        "width": 1220,
+        "color": 5
+      },
+      "name": "Section 4: AI PROCESSING",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3840,
+        288
+      ],
+      "id": "27472f18-2750-481e-8338-5b76d4d6a575"
+    },
+    {
+      "parameters": {
+        "content": "## SETUP GUIDE — Hybrid OCR Invoice Automation\n\n### Credentials\n- No credentials detected (check nodes manually)\n\n### Config Values\n- `validation_status` → node: **APPEND DATA**\n- `processed_at` → node: **APPEND DATA**\n-**https://docs.google.com/spreadsheets/d/1wni583ZliqRQV_Eikb9bmO5kgUGTSwtOFZ6Q-IHmm24/edit?usp=sharing** (Get Idea for Google sheet)\n\n### How to Activate\n1. Connect all credentials (look for red warning icons)\n2. Verify API endpoints and config values\n3. Toggle **Active** in top-right corner\n4. Test with a sample input",
+        "height": 496,
+        "width": 520,
+        "color": 7
+      },
+      "name": "SETUP GUIDE",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -416
+      ],
+      "id": "d6876698-14ee-4e3c-9a59-74ba7f268258"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.ocr.space/parse/image",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2384,
+        640
+      ],
+      "id": "fe8225f7-14a1-4e85-b442-4f4ba87e44cb",
+      "name": "OCR Space (Free)",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5WjjU36cFPvwVpMI",
+          "name": "OCR Space"
+        }
+      },
+      "disabled": true
+    }
+  ],
+  "pinData": {
+    "Google Drive Trigger": [
+      {
+        "json": {
+          "kind": "drive#file",
+          "fileExtension": "pdf",
+          "copyRequiresWriterPermission": false,
+          "md5Checksum": "920f36f009f5482be372b1040bdf8ae2",
+          "writersCanShare": true,
+          "viewedByMe": true,
+          "mimeType": "application/pdf",
+          "parents": [
+            "1ZznsZBahsH5miK3C3vFVP1PIjISaKc-L"
+          ],
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBPgHlG3xqK7kIR0cJG8BblS3NYV01LsnKYHZq3FHbBh8SOaJtOhT_KW8bVXWoQCtGKJdXhizLb39ZrkeUXPdKMQ8LW8CIO7n37NeH7rarVd3dzlKQ=s220",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
+          "shared": false,
+          "lastModifyingUser": {
+            "displayName": "Meheraz Hossain",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "03769669605614984715",
+            "emailAddress": "connect.meheraz@gmail.com",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocLk7w42DQT7R2m9sVFmUxHbqIvjBjnvfEehaaqpCkksCcPuJlo=s64"
+          },
+          "owners": [
+            {
+              "displayName": "Meheraz Hossain",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "03769669605614984715",
+              "emailAddress": "connect.meheraz@gmail.com",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocLk7w42DQT7R2m9sVFmUxHbqIvjBjnvfEehaaqpCkksCcPuJlo=s64"
+            }
+          ],
+          "headRevisionId": "0Bz4RX1QYvqnVZXRPVVVhMzc5Q3pHdWhDc1RPZEt6WUNVN2RNPQ",
+          "webViewLink": "https://drive.google.com/file/d/1yHTsDulgXYeQdcaScwArdOzEAchbpTAb/view?usp=drivesdk",
+          "webContentLink": "https://drive.google.com/uc?id=1yHTsDulgXYeQdcaScwArdOzEAchbpTAb&export=download",
+          "size": "12852",
+          "viewersCanCopyContent": true,
+          "permissions": [
+            {
+              "id": "03769669605614984715",
+              "displayName": "Meheraz Hossain",
+              "type": "user",
+              "kind": "drive#permission",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocLk7w42DQT7R2m9sVFmUxHbqIvjBjnvfEehaaqpCkksCcPuJlo=s64",
+              "emailAddress": "connect.meheraz@gmail.com",
+              "role": "owner",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "hasThumbnail": true,
+          "spaces": [
+            "drive"
+          ],
+          "id": "1yHTsDulgXYeQdcaScwArdOzEAchbpTAb",
+          "name": "scanned pdf.pdf",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "createdTime": "2026-11-25T16:31:38.061Z",
+          "modifiedTime": "2026-11-25T16:31:19.369Z",
+          "modifiedByMeTime": "2026-11-25T16:31:19.369Z",
+          "viewedByMeTime": "2026-11-25T16:31:38.061Z",
+          "quotaBytesUsed": "12852",
+          "version": "3",
+          "originalFilename": "scanned pdf.pdf",
+          "ownedByMe": true,
+          "fullFileExtension": "pdf",
+          "isAppAuthorized": false,
+          "capabilities": {
+            "canChangeViewersCanCopyContent": true,
+            "canEdit": true,
+            "canCopy": true,
+            "canComment": true,
+            "canAddChildren": false,
+            "canDelete": true,
+            "canDownload": true,
+            "canListChildren": false,
+            "canRemoveChildren": false,
+            "canRename": true,
+            "canTrash": true,
+            "canReadRevisions": true,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canMoveItemIntoTeamDrive": true,
+            "canUntrash": true,
+            "canModifyContent": true,
+            "canMoveItemOutOfDrive": true,
+            "canAddMyDriveParent": false,
+            "canRemoveMyDriveParent": true,
+            "canMoveItemWithinDrive": true,
+            "canShare": true,
+            "canMoveChildrenWithinDrive": false,
+            "canModifyContentRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canAcceptOwnership": false,
+            "canReadLabels": false,
+            "canModifyLabels": false,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canRemoveContentRestriction": false,
+            "canDisableInheritedPermissions": false,
+            "canEnableInheritedPermissions": true,
+            "canChangeItemDownloadRestriction": true,
+            "canStartApproval": false,
+            "canAccessViaGenAi": true
+          },
+          "thumbnailVersion": "1",
+          "modifiedByMe": true,
+          "permissionIds": [
+            "03769669605614984715"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "sha1Checksum": "90aa1fb1cb427ed6e37a42bd3045256c669aa64d",
+          "sha256Checksum": "55c09c604ca339ae5c3c2a0899fb86f15e1e2572563412574ba593cf25bd2583",
+          "inheritedPermissionsDisabled": false,
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "clientEncryptionDetails": {
+            "decryptionMetadata": {
+              "wrappedKey": "",
+              "kaclsId": "0",
+              "aes256GcmChunkSize": "unset",
+              "keyFormat": "unsetKeyFormat",
+              "encryptionResourceKeyHash": ""
+            }
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "GET DETAILS": [
+      {
+        "json": {},
+        "pairedItem": [
+          {
+            "item": 0,
+            "input": 0
+          }
+        ]
+      }
+    ],
+    "DOWNLOAD BINARY": [
+      {
+        "json": {},
+        "binary": {
+          "data": {
+            "mimeType": "application/pdf",
+            "fileType": "pdf",
+            "fileExtension": "pdf",
+            "data": "database",
+            "fileName": "scanned pdf.pdf",
+            "id": "database:f5c03bd5-41b1-4c85-98ed-f615fb599791",
+            "fileSize": "12.9 kB",
+            "bytes": 12852
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "EXTRACT FROM FILE": [
+      {
+        "json": {
+          "numpages": 1,
+          "numrender": 1,
+          "info": {
+            "PDFFormatVersion": "1.7",
+            "Language": null,
+            "EncryptFilterName": null,
+            "IsLinearized": false,
+            "IsAcroFormPresent": false,
+            "IsXFAPresent": false,
+            "IsCollectionPresent": false,
+            "IsSignaturesPresent": false,
+            "Producer": "iLovePDF",
+            "ModDate": "D:20260811051023Z"
+          },
+          "text": "",
+          "version": "5.4.296"
+        },
+        "binary": {},
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "CHECK DATA": [
+      {
+        "json": {
+          "numpages": 1,
+          "numrender": 1,
+          "info": {
+            "PDFFormatVersion": "1.7",
+            "Language": null,
+            "EncryptFilterName": null,
+            "IsLinearized": false,
+            "IsAcroFormPresent": false,
+            "IsXFAPresent": false,
+            "IsCollectionPresent": false,
+            "IsSignaturesPresent": false,
+            "Producer": "iLovePDF",
+            "ModDate": "D:20260811051023Z"
+          },
+          "text": "",
+          "version": "5.4.296",
+          "extraction_confidence": "low",
+          "needs_vision_fallback": true,
+          "debug_reason": "too_short"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "GET BINARY": [
+      {
+        "json": {
+          "numpages": 1,
+          "numrender": 1,
+          "info": {
+            "PDFFormatVersion": "1.7",
+            "Language": null,
+            "EncryptFilterName": null,
+            "IsLinearized": false,
+            "IsAcroFormPresent": false,
+            "IsXFAPresent": false,
+            "IsCollectionPresent": false,
+            "IsSignaturesPresent": false,
+            "Producer": "iLovePDF",
+            "ModDate": "D:20260811051023Z"
+          },
+          "text": "",
+          "version": "5.4.296",
+          "extraction_confidence": "low",
+          "needs_vision_fallback": true,
+          "debug_reason": "too_short"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "application/pdf",
+            "fileType": "pdf",
+            "fileExtension": "pdf",
+            "data": "database",
+            "fileName": "scanned pdf.pdf",
+            "id": "database:f5c03bd5-41b1-4c85-98ed-f615fb599791",
+            "fileSize": "12.9 kB",
+            "bytes": 12852
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "OCR Space (Free)": [
+      {
+        "json": {
+          "ParsedResults": [
+            {
+              "TextOverlay": {
+                "Lines": [],
+                "HasOverlay": false,
+                "Message": "Text overlay is not provided as it is not requested"
+              },
+              "TextOrientation": "0",
+              "FileParseExitCode": 1,
+              "ParsedText": "Nayan Tradere\nHouse 12, Road 4, Dhanmondi\nDhaka-1205, Bangladesh\ninfo@mayantraden.com\nINVOICE\nBIll To\nRahim Uddin\nChawkbazar, Chattogram\nrahim.uddin@gmail.com\n+6801801-234587\nInvoice Date\n2026-07-15\nInvolce Number\nBD-INV-1032\nDue Date\n2026-08-14\nDescription\naty\nUnit Price (BDT)\nAmount (RDT\nOffice chairs (ergonomic)\n10\n4,500\n45,000\nDesk lamp\n15\n800\n12,000\nDelivery & installation\n8,000\n8.000\n• Subtotal\n65,000 BDT\nTax (0%)\n0 BDT\nTotal Amount\n65,000 BDT\nPayment terme: Due within 30 days. Late payments subje\nThank you for your busine\nan Traders\nF29",
+              "ErrorMessage": "",
+              "ErrorDetails": ""
+            }
+          ],
+          "OCRExitCode": 1,
+          "IsErroredOnProcessing": false,
+          "ProcessingTimeInMilliseconds": "940",
+          "SearchablePDFURL": "Searchable PDF not generated as it was not requested."
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "GET DETAILS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          {
+            "node": "UPDATE IN DATABASE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET DETAILS": {
+      "main": [
+        [
+          {
+            "node": "IS THIS DETAILS EXIST?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IS THIS DETAILS EXIST?": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DOWNLOAD BINARY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CHECK DATA": {
+      "main": [
+        [
+          {
+            "node": "IS TEXT EXTRACTED?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET BINARY": {
+      "main": [
+        [
+          {
+            "node": "EXTRACT TEXT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DOWNLOAD BINARY": {
+      "main": [
+        [
+          {
+            "node": "EXTRACT FROM FILE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EXTRACT FROM FILE": {
+      "main": [
+        [
+          {
+            "node": "CHECK DATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "APPEND DATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "APPEND DATA": {
+      "main": [
+        [
+          {
+            "node": "Create Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPDATE IN DATABASE": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EXTRACT TEXT": {
+      "main": [
+        [
+          {
+            "node": "MERGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IS TEXT EXTRACTED?": {
+      "main": [
+        [
+          {
+            "node": "GET BINARY",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MERGE",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OCR Space (Free)": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "errorWorkflow": "3HrilvR18ewp1uZS"
+  },
+  "versionId": "a93b4617-ed7d-4300-a00a-290cecddf027",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1d53558c22033b5a503ea23f2f91ceeb975dfadcffcc695f88ac8ff607e8b782"
+  },
+  "nodeGroups": [],
+  "id": "ww0kSUtTsqCwdhU2",
+  "tags": []
+}
