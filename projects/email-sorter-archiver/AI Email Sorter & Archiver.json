@@ -1,0 +1,433 @@
+{
+  "name": "AI Email Sorter & Archiver",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "filters": {
+          "labelIds": [
+            "INBOX",
+            "CATEGORY_PERSONAL"
+          ]
+        }
+      },
+      "id": "7d7a0aec-2570-4155-9e0b-47f95c1e7789",
+      "name": "\tNew Mail Watcher",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        320
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "3bc42502-9748-49bd-9b48-de9fd45d8985",
+      "name": "Sync Delay",
+      "webhookId": "2066b863-4526-40cf-90aa-82229895a73c",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        608,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Label the email based on the details below:\n{{ JSON.stringify($json) }}",
+        "options": {
+          "systemMessage": "=OBJECTIVE:\nAutomatically sort every incoming email into an appropriate \ncustom Gmail label, and remove low-priority emails from the \ninbox (archive) — while keeping genuinely important emails \nvisible in the inbox.\n\nTOOLS AVAILABLE:\nFetch Labels → Pull Message → Create Label → Attach Label → \nUpdate Message (remove INBOX)\n\n═══════════════════════════════════════\nSTEP 1 - DETERMINE PRIORITY LEVEL\n═══════════════════════════════════════\n\nHIGH PRIORITY (keep in INBOX + attach label) — mark as high \npriority if ANY of these apply:\n- Sent by a real, identifiable individual (not automated)\n- Personal or professional/work-related conversation\n- From a bank, financial institution, or payment service\n- Content includes: invoice, payment, meeting, complaint, \n  order, contract, deadline, urgent request\n- Clearly expects a reply, action, or decision from the user\n- Any email where skipping a response could cause a real \n  consequence (missed payment, missed meeting, unresolved \n  complaint, etc.)\n\nLOW PRIORITY (attach label + archive) — mark as low priority \nif ANY of these apply:\n- Sender is no-reply, automated, or a system-generated address\n- Newsletter, marketing, promotional, or advertising content\n- Contains an unsubscribe link, \"view in browser\" link, or \n  bulk-sending footer\n- General platform notifications that require no action \n  (e.g., \"new feature announcement\", \"policy update\", \n  \"changelog\", \"your credits refreshed\")\n- Social media notifications, product updates, or \n  informational-only content\n\nIF UNCERTAIN between High and Low:\n- Default to HIGH PRIORITY. It is safer to keep an ambiguous \n  email visible in the inbox than to accidentally archive \n  something important.\n- Never guess silently — base the decision only on actual \n  content in the subject, snippet, and body. Do not assume \n  intent that isn't supported by the message content.\n\n═══════════════════════════════════════\nSTEP 2 - ASSIGN LABEL (STRICT CONTENT MATCHING)\n═══════════════════════════════════════\n\n- First, fetch all existing labels.\n- Reuse an existing label ONLY if its name or topic is \n  DIRECTLY and CLEARLY related to this specific email's \n  actual content, sender, or purpose.\n- Do NOT reuse a label just because it shares a parent \n  category (e.g., do not put a meeting email into \n  \"AI/Discord\" just because both fall under \"AI\").\n- Do NOT reuse a label based on vague or thematic similarity \n  — the match must be topically accurate, not just \n  \"close enough.\"\n- If no existing label is a clear, direct match:\n  - If a relevant PARENT label already exists (e.g., \"AI\"), \n    create a new SUBLABEL under it that precisely describes \n    this email's actual topic \n    (e.g., \"AI/Meetings\", \"AI/Banking\", \"AI/Orders\", \n    \"AI/Newsletters\", \"AI/Work\").\n  - If NO parent label exists at all, first create the \"AI\" \n    parent label, then create the relevant sublabel under it.\n- Each label should represent one clear topic/category — \n  avoid creating overly generic labels (e.g., avoid just \n  \"AI/Misc\" or \"AI/Other\" unless truly nothing else fits).\n- Never reuse a label such as \"AI/Discord\" or \"AI/LinkedIn\" \n  unless the email is genuinely about that specific platform \n  or service.\n- Before creating a new label, double-check the existing \n  label list one more time to avoid creating near-duplicate \n  labels (e.g., avoid creating both \"AI/Meeting\" and \n  \"AI/Meetings\" — reuse the existing one if it already exists \n  in singular or plural form).\n\n═══════════════════════════════════════\nSTEP 3 - TAKE ACTION\n═══════════════════════════════════════\n\n- HIGH PRIORITY → Attach the assigned label, leave the \n  message in INBOX (do not modify/remove INBOX).\n- LOW PRIORITY → Attach the assigned label, then call \n  Update Message to remove the INBOX label (archive it).\n- Every action must be based on the priority decision made \n  in Step 1 — do not skip or reverse the order.\n\n═══════════════════════════════════════\nCRITICAL RULES (NEVER VIOLATE)\n═══════════════════════════════════════\n\n- NEVER use or modify Gmail's built-in SYSTEM labels \n  (CATEGORY_PROMOTIONS, CATEGORY_PERSONAL, CATEGORY_SOCIAL, \n  CATEGORY_UPDATES, INBOX, SPAM, TRASH, STARRED, IMPORTANT, \n  etc.) — these must never be created, renamed, or attached \n  as if they were custom labels.\n- ONLY create and use CUSTOM labels for categorization.\n- You MUST actually call the required tools for every action \n  — never just describe or assume an action was taken. \n  If a tool call is required by this workflow, it must be \n  executed, not narrated.\n- Never skip the label-fetching step, even if you assume you \n  already know the existing labels from a previous run.\n- Always use the EXACT message ID and thread ID from the \n  original triggering email in every single tool call — \n  never reuse an ID from a previous run or guess an ID.\n- If a required tool call fails or returns an error, do not \n  proceed to the next step as if it succeeded — retry once, \n  and if it still fails, stop and do not take further action \n  on that email.\n- Process ONE email fully (all steps) before moving to \n  another, if multiple are received.\n\n═══════════════════════════════════════\nEXECUTION SEQUENCE (STRICT ORDER)\n═══════════════════════════════════════\n\n1. Fetch all existing labels\n2. Pull the full email message (using its exact message ID)\n3. Determine priority (Step 1 logic)\n4. Match or create the appropriate label (Step 2 logic)\n5. Attach the label to the message\n6. If low priority → call Update Message to remove INBOX\n7. Confirm all required tool calls were actually executed \n   before ending the run for this email",
+          "maxIterations": 10
+        }
+      },
+      "id": "62366ade-33fc-4cf5-a8b6-15902ca52ffb",
+      "name": "Inbox Sorting Agent",
+      "notesInFlow": true,
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "retryOnFail": false,
+      "position": [
+        912,
+        320
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "Objective:\nAutomatically categorize incoming emails based on existing Gmail labels or create a new label if none match.\n\nTools:\n- Get message\n- Read all labels\n- Create label\n- Assign label to message\n\nInstructions:\n\nLabel Matching:\n\nAnalyze the email's subject, sender, recipient, keywords, and content.\nCompare with existing Gmail labels to find the most relevant match.\nLabel Assignment:\n\nAssign the email to the most appropriate existing label.`\nRemove the inbox label if the email is of less importance (like ads, promotions, aka \"Reclame\"), keep normal and important emails in the inbox.\nIf no suitable label exists, create a new label based on the existing labels. Try reusing existing labels as much as possible. Always create a label as a sublabel, if no label applies, if the main label already exists, create the new label under the existing label, if no main label exists, create the label AI and create the new label under this label.\nLabel Creation:\n\nEnsure new labels align with the structure of existing ones, including capitalization, delimiters, and prefixes.\nExamples:\n\nIf the email subject is \"Project Alpha Update,\" assign to [Project Alpha] if it exists.\nFor \"New Vendor Inquiry,\" create \"Vendor Inquiry\" if no relevant label exists.\nOutcome:\nEmails are consistently categorized under the appropriate or newly created labels, maintaining Gmail's organizational structure."
+    },
+    {
+      "parameters": {
+        "model": "gpt-4.1-mini",
+        "options": {
+          "maxTokens": 4096
+        }
+      },
+      "id": "5070b21d-6998-40f9-a866-a1acd4260530",
+      "name": "\tReasoning Engine (GPT)",
+      "notesInFlow": false,
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        912,
+        480
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "ooVjyN817w2eFPAh",
+          "name": "OpenAI (Inmetech)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.id }}"
+      },
+      "id": "11b502d1-0829-4eb5-b48c-dfbe81605661",
+      "name": "\tContext Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1152,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this to get all existing Gmail labels before doing anything",
+        "resource": "label",
+        "returnAll": true
+      },
+      "id": "15df8549-0124-4bd3-b690-be287a7f072f",
+      "name": "Fetch Existing Labels",
+      "webhookId": "d8ec9401-a9ff-4fe2-9c1e-5a8036cd96c9",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1408,
+        480
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this to read the full email content, subject, sender",
+        "operation": "get",
+        "messageId": "={{ $fromAI('gmail_message_id', 'id of the gmail message, like 1944fdc33f544369', 'string') }}"
+      },
+      "id": "ed3b9371-c913-4425-a09a-d42835eaa092",
+      "name": "Pull Email Content",
+      "webhookId": "d8ec9401-a9ff-4fe2-9c1e-5a8036cd96c9",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1664,
+        480
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this to remove INBOX label from low importance emails",
+        "operation": "removeLabels",
+        "messageId": "={{ $fromAI('gmail_message_id') }}",
+        "labelIds": [
+          "INBOX"
+        ]
+      },
+      "id": "b2aa5a34-5e9b-4074-a331-8e5b46e57291",
+      "name": "Update Message Status",
+      "webhookId": "d8ec9401-a9ff-4fe2-9c1e-5a8036cd96c9",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1904,
+        480
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this to assign a label to the email",
+        "operation": "addLabels",
+        "messageId": "={{ $fromAI('gmail_message_id') }}",
+        "labelIds": "={{ $fromAI('gmail_categories', 'array of label ids') }}"
+      },
+      "id": "b128edb9-b414-4f76-9594-074744afa0d2",
+      "name": "Apply Label",
+      "webhookId": "7a87b026-1c6e-40e1-a062-aefdd1af1585",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        2160,
+        480
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this to create a new custom label if no existing label fits",
+        "resource": "label",
+        "operation": "create",
+        "name": "={{ $fromAI('new_label_name', 'new label name', 'string' ) }} ",
+        "options": {}
+      },
+      "id": "5ff7fd82-16c1-40e0-8d8b-33e465a9efbf",
+      "name": "Generate New Label",
+      "webhookId": "d8ec9401-a9ff-4fe2-9c1e-5a8036cd96c9",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        2400,
+        480
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 1. INPUT & TRIGGER\n\n\tNew Mail Watcher, Sync Delay",
+        "height": 210,
+        "width": 556,
+        "color": 2
+      },
+      "name": "Section 1: INPUT & TRIGGER",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        208
+      ],
+      "id": "33a5ed7d-2fe6-4ff5-af8b-24594e503e54"
+    },
+    {
+      "parameters": {
+        "content": "## 2. AI PROCESSING\n\nInbox Sorting Agent",
+        "height": 370,
+        "width": 360,
+        "color": 5
+      },
+      "name": "Section 2: AI PROCESSING",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        832,
+        208
+      ],
+      "id": "6205a61f-1ed0-4e1a-937c-c9b09e2228fb"
+    },
+    {
+      "parameters": {
+        "content": "## SETUP GUIDE — AI Email Sorter & Archiver\n\n### Credentials\n- No credentials detected (check nodes manually)\n\n### How to Activate\n1. Connect all credentials (look for red warning icons)\n2. Verify API endpoints and config values\n3. Toggle **Active** in top-right corner\n4. Test with a sample input",
+        "height": 348,
+        "width": 520,
+        "color": 7
+      },
+      "name": "SETUP GUIDE",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -384
+      ],
+      "id": "5a95ce27-6881-46d9-9ac2-bbe222f773a0"
+    }
+  ],
+  "pinData": {
+    "\tNew Mail Watcher": [
+      {
+        "json": {
+          "id": "1a213762ab6e7bdd",
+          "threadId": "1a213762ab6e7bdd",
+          "snippet": "BDT 65000.00 has been credited to your A/C ***9103 on 25-Nov-2026. Ref: SAL/NOV/2026. Current balance: BDT 1,07350.00.",
+          "payload": {
+            "mimeType": "multipart/alternative"
+          },
+          "sizeEstimate": 7708,
+          "historyId": "68667",
+          "internalDate": "1795622829000",
+          "labels": [
+            {
+              "id": "INBOX",
+              "name": "INBOX"
+            },
+            {
+              "id": "CATEGORY_PERSONAL",
+              "name": "CATEGORY_PERSONAL"
+            },
+            {
+              "id": "UNREAD",
+              "name": "UNREAD"
+            }
+          ],
+          "From": "Aspiring Life Consultants <aspiringlifeconsultant.blog@gmail.com>",
+          "Subject": "Salary Credited to Your Account",
+          "To": "\"connect.meheraz@gmail.com\" <connect.meheraz@gmail.com>"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "\tNew Mail Watcher": {
+      "main": [
+        [
+          {
+            "node": "Sync Delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync Delay": {
+      "main": [
+        [
+          {
+            "node": "Inbox Sorting Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "\tReasoning Engine (GPT)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Inbox Sorting Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "\tContext Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Inbox Sorting Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Existing Labels": {
+      "ai_tool": [
+        [
+          {
+            "node": "Inbox Sorting Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Email Content": {
+      "ai_tool": [
+        [
+          {
+            "node": "Inbox Sorting Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Message Status": {
+      "ai_tool": [
+        [
+          {
+            "node": "Inbox Sorting Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Label": {
+      "ai_tool": [
+        [
+          {
+            "node": "Inbox Sorting Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate New Label": {
+      "ai_tool": [
+        [
+          {
+            "node": "Inbox Sorting Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "errorWorkflow": "3HrilvR18ewp1uZS"
+  },
+  "versionId": "a57aaca4-0f20-43bf-9f77-f513f2699daa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1d53558c22033b5a503ea23f2f91ceeb975dfadcffcc695f88ac8ff607e8b782"
+  },
+  "nodeGroups": [],
+  "id": "g0Sgkngy0roOIgFp",
+  "tags": []
+}
