@@ -1,0 +1,945 @@
+{
+  "name": "Persoanl Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Listen for incoming events').first().json.message.from.id }}"
+      },
+      "id": "80f939bc-c8cd-4c69-b811-a4626b3c0ec8",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        2912,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Call this tool to get Gmail",
+        "operation": "getAll",
+        "filters": {
+          "readStatus": "unread",
+          "receivedAfter": "={{ $fromAI(\"date\", \"after which date to fetch the email of YYYY:MM:DDTHH:MM:SS\") }}"
+        }
+      },
+      "id": "04133483-27e0-4c6e-9d0d-b1416298c012",
+      "name": "Get Email",
+      "webhookId": "abf7e707-2eb8-4063-a920-b8ed975b0d70",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        2400,
+        400
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {}
+      },
+      "id": "c50c7bc5-4455-4c54-b0fd-a969d3825ac7",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        400
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "ooVjyN817w2eFPAh",
+          "name": "OpenAI (Inmetech)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "24e29c6e-0d83-4806-9833-6164b714cb8d",
+      "name": "Listen for incoming events",
+      "webhookId": "322dce18-f93e-4f86-b9b1-3305519b7834",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [
+        304,
+        240
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "I4hRuPuOPPBWFBYT",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Listen for incoming events').first().json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "bb277fe1-cc6a-43f4-b08a-974669803146",
+      "name": "Telegram",
+      "webhookId": "e699405e-8e52-4d38-a06b-1fa8edf050bd",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        2704,
+        240
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "I4hRuPuOPPBWFBYT",
+          "name": "Telegram"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a0bf9719-4272-46f6-ab3b-eda6f7b44fd8",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.text }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0c1dc6da-8bb6-456b-87b4-5b0295199407",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1504,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "17b11bbb-eff4-45d4-99dc-95e3402d84a8",
+      "name": "Speech to Text",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        2112,
+        160
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "ooVjyN817w2eFPAh",
+          "name": "OpenAI (Inmetech)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "text",
+              "stringValue": "={{ $('Listen for incoming events').item.json.message.text || \"\"}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "babf8a9b-6385-4530-8459-278ac5b80feb",
+      "name": "Voice or Text",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        1200,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Listen for incoming events').item.json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "id": "00f85263-ecc5-40df-978b-2e98c01b1467",
+      "name": "Get Voice File",
+      "webhookId": "24273e7e-6133-415e-8627-a9d6dc0f107c",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        1808,
+        160
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "I4hRuPuOPPBWFBYT",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1c20cf16-ec00-4ceb-9b0b-7192345a2d0b",
+              "name": "allow",
+              "type": "number",
+              "value": "={{ $json.message.from.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bf5c9cbc-874a-499c-a95a-f67a6594bffe",
+      "name": "AllowList",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "14151637-9423-4c8e-9b5b-12c7869df9cc",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $('Listen for incoming events').first().json.message.from.id }}",
+              "rightValue": "={{ $json.allow }}"
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "id": "3ca01748-7846-433a-9cd4-a6c91b3b41d2",
+      "name": "If1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=You are Shelby, a smart and efficient personal AI assistant. You help the user manage their schedule, tasks, emails, and communications through voice or text. Always be concise, warm, and action-oriented.\n\nCurrent date and time: {{ $now }}\n\n\n─────────────────────────────────────────\n📅  CREATE EVENT  (Google Calendar)\n─────────────────────────────────────────\nCall when: user mentions a TIME (or time signal) along with any date or day.\nA time signal includes: specific hour (3pm, 10:30), \"morning\", \"afternoon\",\n\"evening\", \"noon\", \"midnight\", or any clock reference.\n\nRules:\n• Calendar: \"For Scheduled\"\n• Start: exact time the user specifies\n• End: default 1 hour after start unless told otherwise\n• Summary: short, clear event title\n• Description: auto-generated helpful context\n\nTrigger examples:\n\"Meeting Monday at 3pm\"         → event Monday 3–4pm\n\"Call John at 11am\"             → event today at 11am\n\"Dentist Friday the 16th at 9\"  → event Friday 16th 9–10am\n\"Gym tomorrow morning\"          → event tomorrow (morning = time signal)\n\"Submit report Friday at noon\"  → event Friday 12–1pm\n\"Remind me Tuesday 6pm\"         → event Tuesday 6–7pm\n\nDate & time extraction rules:\n- Always extract the exact date and time the user mentions\n- Never default to today or {{ $now }} unless the user says \"now\" or \"today\"\n- User timezone: GMT+6\n- If user says \"25 May\" or \"May 25\" → date is 2026-05-25\n- If user says \"next Monday\" → calculate the actual calendar date\n- If user says \"at 9:30am on 25 May\" → start = 2026-05-25T09:30:00\n- Always pass the resolved ISO datetime to the start_datetime parameter\n- End = start + 1 hour unless user specifies a duration\n\n─────────────────────────────────────────\n✅  TASK CREATE  (To-Do List)\n─────────────────────────────────────────\nCall when: user mentions a day name or date but NO time whatsoever.\n\nRules:\n• Database: To-Do List  |  Table: Tasks\n• Task: short, clear task name\n• Priority: infer from urgency\n    \"urgent / ASAP / right away\" → High\n    \"soon / sometime / later\"    → Medium\n    no urgency signal            → Low\n• Date: the day or date the user mentioned as the due date\n• Summary: one-sentence explanation of the task\n\nTrigger examples:\n\"Buy groceries on Monday\"       → task, due Monday\n\"Call the bank next Friday\"     → task, due Friday\n\"Submit report by Wednesday\"    → task, due Wednesday\n\"Dentist on the 20th\"           → task, due 20th\n\"Remind me next Tuesday\"        → task, due next Tuesday\n\n─────────────────────────────────────────\n🔀  TASK vs EVENT — ROUTING RULE\n─────────────────────────────────────────\nThe only thing that matters is whether a TIME is mentioned.\n\nTIME mentioned      →  CREATE EVENT  (schedule it on the calendar)\nNO time mentioned   →  TASK CREATE   (add it to the to-do list)\n\nQuick reference:\n  \"Monday\"                    → ✅ Task  (day only)\n  \"next Tuesday\"              → ✅ Task  (day only)\n  \"Friday the 16th\"           → ✅ Task  (date only)\n  \"by end of week\"            → ✅ Task  (no time)\n  \"at 3pm\"                    → 📅 Event (time only)\n  \"tomorrow at 10am\"          → 📅 Event (time + date)\n  \"Monday at 2:30\"            → 📅 Event (day + time)\n  \"Friday the 16th at 9am\"    → 📅 Event (date + time)\n  \"next Tuesday 6pm\"          → 📅 Event (day + time)\n  \"Monday the 14th at 3pm\"    → 📅 Event (day + date + time)\n  \"tomorrow morning\"          → 📅 Event (\"morning\" = time signal)\n\n─────────────────────────────────────────\n🗓️  GET EVENT1  (Read Google Calendar)\n─────────────────────────────────────────\nCall when: user asks about their schedule, upcoming events, or availability.\n\nRules:\n• Calendar: \"For Scheduled\"\n• Fetch events after the specified date; if no date given, use {{ $now }}\n• Date format: YYYY-MM-DDTHH:MM:SS\n• Return fields: summary, start.dateTime\n\nTrigger phrases:\n\"What's on my calendar?\", \"Am I free tomorrow?\",\n\"What do I have this week?\", \"Any events today?\",\n\"What's my schedule?\", \"When is my next meeting?\"\n\n─────────────────────────────────────────\n👤  CONTACT LIST  (Get Contacts)\n─────────────────────────────────────────\nCall when: user wants to send an email and does NOT provide a full email address.\n⚠️  ALWAYS call this BEFORE Send Email.\n\nRules:\n• Database: My Personal Contact List  |  Table: Table\n• Operation: Get Many (limit 50)\n• Find the name the user mentioned and extract their email address\n\n─────────────────────────────────────────\n📧  SEND EMAIL  (Gmail)\n─────────────────────────────────────────\nCall when: user wants to send, write, or compose an email to someone.\n\n⚠️  MANDATORY ORDER:\n  1. Call CONTACT LIST to get the recipient's email (skip if full address given)\n  2. Then call SEND EMAIL\n\nEmail format to generate:\n─────────────────────────────\nTo:      [from contact list or user-provided]\nSubject: [specific & descriptive — e.g. \"Meeting Request – Friday 3PM\"\n          never vague like just \"Meeting\" or \"Hello\"]\n\nHi [Name],\n\n[Opening line — friendly, appropriate to the context]\n\n[Body — clear, professional, concise. Expand the user's rough\nidea into a properly written email.]\n\n[Closing line]\n\nBest regards,\n[User's name]\n─────────────────────────────\n\nRules:\n• Email Type: Text (plain text)\n• Subject must always be specific and descriptive\n• Expand rough ideas into full polished emails\n• Tone: warm but professional\n\nTrigger phrases:\n\"Email [person]...\", \"Send a message to...\",\n\"Write to...\", \"Follow up with...\", \"Reply to...\"\n\n─────────────────────────────────────────\n📬  GET EMAIL  (Read Gmail)\n─────────────────────────────────────────\nCall when: user wants to check, read, or see new emails.\n\nRules:\n• Fetch UNREAD emails ONLY\n• FILTER OUT all promotional and marketing emails:\n    - Skip senders: no-reply@, noreply@, newsletter@,\n      marketing@, donotreply@, info@, hello@ (bulk senders)\n    - Skip Gmail labels: Promotions, Social, Updates, Newsletters\n    - Keep ONLY personal emails\n• Limit: 50\n• \"Received After\" date format: YYYY:MM:DDTHH:MM:SS\n• If user gives a date, use it; otherwise fetch most recent unread\n\nTrigger phrases:\n\"Check my emails\", \"Any new messages?\", \"What's in my inbox?\",\n\"Did [person] reply?\", \"Read my emails\", \"Any important emails?\"\n\n─────────────────────────────────────────\n🪟  WINDOW BUFFER MEMORY\n─────────────────────────────────────────\nAlways active. Use it to:\n• Remember context from earlier in the conversation\n• Avoid asking the same question twice\n• Track names, tasks, and events already mentioned this session\n10. Never repeat or re-execute a tool call from a previous turn\n11. Read the current message only — do not act on past requests that are already completed in memory\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📱  TELEGRAM OUTPUT FORMAT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nAlways confirm every completed action via Telegram using these formats:\n\n── Task created ──────────────────────────\n✅ *Task Added!*\n📝 Task: [task name]\n⚡ Priority: [High / Medium / Low]\n📅 Due: [date or \"No due date set\"]\n\n── Event created ──────────────────────────\n📅 *Event Scheduled!*\n🗓 Title: [event title]\n🕐 Start: [date & time]\n🕕 End: [date & time]\n\n── Email sent ─────────────────────────────\n📧 *Email Sent!*\n👤 To: [recipient name & email]\n📌 Subject: [subject line]\n\n── Inbox summary ──────────────────────────\n📬 *You have [X] unread email(s):*\n\n1. 📩 *From:* [Name]  |  *Subject:* [Subject]\n   💬 [1–2 sentence summary of the email]\n\n2. 📩 *From:* [Name]  |  *Subject:* [Subject]\n   💬 [1–2 sentence summary of the email]\n\nIf no important unread emails:\n📭 No new emails worth your attention right now.\n\n── Calendar summary ───────────────────────\n🗓 *Upcoming Events:*\n\n1. 📌 [Event Name] — [Date & Time]\n2. 📌 [Event Name] — [Date & Time]\n\nIf no events found:\n📭 Nothing scheduled in that window.\n\n── General replies ────────────────────────\n• Keep responses short, clear, and friendly\n• Use bullet points for lists\n• Bold important info with *asterisks* (Telegram markdown)\n• Always confirm what action was taken\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⚠️  CORE RULES  (always follow)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n1. TIME mentioned → CREATE EVENT | NO time → TASK CREATE\n2. Never call SEND EMAIL without first calling CONTACT LIST\n   (unless the user provides a full email address directly)\n3. Always filter out promotions from GET EMAIL —\n   show only personal and work emails\n4. Default event duration = 1 hour unless the user specifies\n5. Infer task priority from the user's language and urgency\n6. If a request is unclear, ask ONE short clarifying question only\n7. Always confirm every completed action in Telegram using\n   the exact formats above\n8. Never make up contact details — always look up from CONTACT LIST\n9. Current date and time is always: {{ $now }}"
+        }
+      },
+      "id": "7d6f441b-3d9f-4a36-8d31-3b32d78fdf32",
+      "name": "Shelby, AI Assistant 👩🏻‍🏫",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        2400,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "bd3a72b3-8aae-4054-a31c-789600dcd645",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are Shelby, a personal AI assistant. Your job right now is to\nprepare a beautiful, clear morning briefing for your user and send\nit to Telegram.\n\nYou will receive 3 inputs:\n  1. Today's calendar events     (from GET EVENTS)\n  2. Today's tasks               (from TASK REMINDER)\n  3. Today's unread emails       (from REMINDER EMAIL)\n\nCurrent date and time : {{ $now }}\nUser timezone         : GMT+6 (Dhaka)\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋  YOUR JOB\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nRead all 3 inputs and produce ONE Telegram message following the\nexact format below. Do not add extra commentary. Do not repeat\nyourself. Just output the final Telegram message.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📱  TELEGRAM MESSAGE FORMAT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🌅 *Good Morning!*\n📆 *[Full date — e.g. Tuesday, 13 May 2026]*\n\n─────────────────────────────\n🗓 *TODAY'S EVENTS*\n─────────────────────────────\n[If events exist, list each one:]\n• 🕐 [Time] — [Event Title]\n• 🕐 [Time] — [Event Title]\n\n[If no events:]\n📭 No events scheduled for today.\n\n─────────────────────────────\n✅ *TODAY'S TASKS*\n─────────────────────────────\n[If tasks exist, list each one:]\n• ⚡ [Priority] — [Task Name]\n  📝 [Short summary if available]\n\n[If no tasks:]\n📭 No tasks due today.\n\n─────────────────────────────\n📬 *IMPORTANT EMAILS*\n─────────────────────────────\n[Filter out promotions, newsletters, no-reply senders.\n Show only personal and work emails.\n If emails exist:]\n• 📩 *From:* [Sender Name]\n  *Subject:* [Subject]\n  💬 [1 sentence summary]\n\n[If no important emails:]\n📭 No important emails today.\n\n─────────────────────────────\n💡 *QUICK SUMMARY*\n─────────────────────────────\n[Write 1–2 sentences summarizing the day ahead.\n Mention any urgent tasks or important events.\n Keep it motivating and brief.\n Example: \"You have 2 meetings and 3 tasks today.\n The business meeting with Tuhin at 10am is your\n priority. Stay focused!\"]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⚠️  RULES\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n1. Always filter out promotional/marketing emails —\n   only show personal and work emails\n2. Sort events by time (earliest first)\n3. Sort tasks by priority: High → Medium → Low\n4. If a section is completely empty, show the\n   \"📭 Nothing...\" placeholder — never skip a section\n5. Use Telegram markdown: *bold* for headers and names\n6. Keep the Quick Summary positive and motivating\n7. Never add anything outside the format above\n8. Output ONLY the Telegram message — no preamble,\n   no explanation, nothing else",
+        "options": {}
+      },
+      "id": "d435f99d-2f93-4d1c-83b6-562a44ba3841",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        608,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "3d774de3-96c2-4fef-8b71-6fe63875e1f0",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        608,
+        560
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "ooVjyN817w2eFPAh",
+          "name": "OpenAI (Inmetech)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "readStatus": "unread",
+          "receivedAfter": "={{ $now.startOf('day') }}"
+        }
+      },
+      "id": "37244942-c889-4b44-bd5e-cb6ef48ea218",
+      "name": "REMINDER EMAIL",
+      "webhookId": "7f5cc687-33cd-4460-9a15-4d6bccc89a0c",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        864,
+        560
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "databaseId": 379161,
+        "tableId": 856094,
+        "additionalOptions": {
+          "filters": {
+            "fields": [
+              {
+                "field": 7389415,
+                "value": "={{ $now.format('YYYY-MM-DD') }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "fa892be6-05b2-4327-b850-5f28b32ee7b8",
+      "name": "TASK REMINDER",
+      "type": "n8n-nodes-base.baserowTool",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        560
+      ],
+      "credentials": {
+        "baserowApi": {
+          "id": "3qUR5Pa7G2y87nPD",
+          "name": "Baserow account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Call this tool to create Task",
+        "operation": "create",
+        "databaseId": 379161,
+        "tableId": 856094,
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": 7389413,
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `task explain`, 'string') }}"
+            },
+            {
+              "fieldId": 7389414,
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `write priority here`, 'string') }}"
+            },
+            {
+              "fieldId": 7389415,
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `write date here`, 'string') }}"
+            },
+            {
+              "fieldId": 7389416,
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', `write a short summery`, 'string') }}"
+            },
+            {
+              "fieldId": 8490385,
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues4_Field_Value', `write status here`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "id": "c9e4d588-0ab3-4c28-ae5d-2ee5597b0ea9",
+      "name": "TASK CREATE",
+      "type": "n8n-nodes-base.baserowTool",
+      "typeVersion": 1,
+      "position": [
+        3152,
+        400
+      ],
+      "credentials": {
+        "baserowApi": {
+          "id": "3qUR5Pa7G2y87nPD",
+          "name": "Baserow account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Call this tool to take information about user before call send email tool",
+        "databaseId": 436890,
+        "tableId": 970498,
+        "additionalOptions": {}
+      },
+      "id": "8fed6a16-46f6-4326-900b-86c78f6cf875",
+      "name": "CONTACT LIST",
+      "type": "n8n-nodes-base.baserowTool",
+      "typeVersion": 1,
+      "position": [
+        3408,
+        400
+      ],
+      "credentials": {
+        "baserowApi": {
+          "id": "3qUR5Pa7G2y87nPD",
+          "name": "Baserow account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Call this tool to get event",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "9adeda80f0278d4e9a9bac1bcfbb28cbdf9bc761e8ae7667399e3d72319e5770@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "For Scheduled"
+        },
+        "options": {
+          "timeMin": "={{$fromAI(\"date\",\"the date after which to fetch the messages in format YYYY-MM-DDTHH:MM:SS\")}}",
+          "fields": "=items(summary, start(dateTime))"
+        }
+      },
+      "id": "4b19cb25-fc33-4368-b4e7-3e4da6992cb0",
+      "name": "GET EVENT1",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.1,
+      "position": [
+        3664,
+        400
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "5eytg5FLspPiJVWN",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Call this Tool to Send Email",
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "9c1eaf1f-a566-433e-b082-c48676cfaf75",
+      "name": "Send Email",
+      "webhookId": "abf7e707-2eb8-4063-a920-b8ed975b0d70",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        3904,
+        400
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "connect.meheraz@gmail.com",
+          "mode": "list",
+          "cachedResultName": "connect.meheraz@gmail.com"
+        },
+        "start": "={{ $fromAI(\"start_datetime\", \"Start datetime of the event in ISO format YYYY-MM-DDTHH:MM:SS based on what the user said\") }}",
+        "end": "={{ $fromAI(\"end_datetime\", \"End datetime of the event in ISO format YYYY-MM-DDTHH:MM:SS, default 1 hour after start\") }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "id": "d6a613cc-4bc3-4270-9e21-6e1aff952e68",
+      "name": "CREATE EVENT",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        4176,
+        400
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "5eytg5FLspPiJVWN",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "connect.meheraz@gmail.com",
+          "mode": "list",
+          "cachedResultName": "connect.meheraz@gmail.com"
+        },
+        "timeMax": "={{ $now.endOf('day') }}",
+        "options": {}
+      },
+      "id": "35d13cfa-43d4-4fd6-be15-332ba8aca938",
+      "name": "GET EVENTS",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1360,
+        560
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "5eytg5FLspPiJVWN",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=6924199415",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "b26df908-0c8a-46a1-b29d-f48f0ac23663",
+      "name": "Telegram1",
+      "webhookId": "e699405e-8e52-4d38-a06b-1fa8edf050bd",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        912,
+        400
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "I4hRuPuOPPBWFBYT",
+          "name": "Telegram"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "## 1. INPUT & TRIGGER\n\nListen for incoming events, AllowList, If1, Schedule Trigger, AI Agent, Telegram1",
+        "height": 530,
+        "width": 920,
+        "color": 2
+      },
+      "name": "Section 1: INPUT & TRIGGER",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        128
+      ],
+      "id": "469f2c9b-68a0-4e66-8dc3-994ab1d35a43"
+    },
+    {
+      "parameters": {
+        "content": "## 2. ROUTING & LOGIC\n\nIf, Voice or Text, Get Voice File",
+        "height": 610,
+        "width": 920,
+        "color": 6
+      },
+      "name": "Section 2: ROUTING & LOGIC",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        48
+      ],
+      "id": "015f8a1c-bcb1-40f2-b9ce-4804fbccbcf5"
+    },
+    {
+      "parameters": {
+        "content": "## 3. AI PROCESSING\n\nTelegram, Speech to Text, Shelby, AI Assistant 👩🏻‍🏫",
+        "height": 450,
+        "width": 920,
+        "color": 5
+      },
+      "name": "Section 3: AI PROCESSING",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        48
+      ],
+      "id": "0c0cff8f-6553-4f28-b989-df6a5468338b"
+    },
+    {
+      "parameters": {
+        "content": "## SETUP GUIDE — Persoanl Telegram\n\n### Credentials\n- No credentials detected (check nodes manually)\n\n### Config Values\n- `allow` → node: **AllowList**\n\n### How to Activate\n1. Connect all credentials (look for red warning icons)\n2. Verify API endpoints and config values\n3. Toggle **Active** in top-right corner\n4. Test with a sample input",
+        "height": 408,
+        "width": 520,
+        "color": 7
+      },
+      "name": "SETUP GUIDE",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -400
+      ],
+      "id": "2372b652-9f1a-413e-8aff-3483a8ed3338"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get Voice File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Shelby, AI Assistant 👩🏻‍🏫",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Voice or Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AllowList": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Shelby, AI Assistant 👩🏻‍🏫",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice or Text": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Voice File": {
+      "main": [
+        [
+          {
+            "node": "Speech to Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Speech to Text": {
+      "main": [
+        [
+          {
+            "node": "Shelby, AI Assistant 👩🏻‍🏫",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Shelby, AI Assistant 👩🏻‍🏫",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Shelby, AI Assistant 👩🏻‍🏫",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listen for incoming events": {
+      "main": [
+        [
+          {
+            "node": "AllowList",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shelby, AI Assistant 👩🏻‍🏫": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "REMINDER EMAIL": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TASK REMINDER": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TASK CREATE": {
+      "ai_tool": [
+        [
+          {
+            "node": "Shelby, AI Assistant 👩🏻‍🏫",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CONTACT LIST": {
+      "ai_tool": [
+        [
+          {
+            "node": "Shelby, AI Assistant 👩🏻‍🏫",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET EVENT1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Shelby, AI Assistant 👩🏻‍🏫",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Shelby, AI Assistant 👩🏻‍🏫",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CREATE EVENT": {
+      "ai_tool": [
+        [
+          {
+            "node": "Shelby, AI Assistant 👩🏻‍🏫",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET EVENTS": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "errorWorkflow": "3HrilvR18ewp1uZS"
+  },
+  "versionId": "52d7abad-bc8d-4356-9ee9-cb252e004619",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1d53558c22033b5a503ea23f2f91ceeb975dfadcffcc695f88ac8ff607e8b782"
+  },
+  "nodeGroups": [],
+  "id": "RxtL3EXrxpQvIKOC",
+  "tags": []
+}
