@@ -1,0 +1,5461 @@
+{
+  "name": "Tenant Maintenance Management-Real Estate",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "25cb3113-fda5-4ffb-a33d-61f524d6aa1d",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -6048,
+        1184
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "ooVjyN817w2eFPAh",
+          "name": "OpenAI (Inmetech)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"urgency\": \"high\",\t\"vendor_category_needed\":\"plumber\",\n  \"description\": \"one sentence summary of the issue\"\n}"
+      },
+      "id": "57098165-007e-484e-a1ac-85edf10e9871",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -5792,
+        1184
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"ticket_id\": \"{{ $('NORMALIZE DATA').item.json['Ticket ID'] }}\",\n  \"message\": \"Thank you! Your maintenance request has been received. Your ticket number is {{ $('NORMALIZE DATA').item.json['Ticket ID'] }}. Our team will review it and get back to you shortly.\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "1b7a4898-3c39-4d83-b5b2-a565ac329d10",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -5392,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "maintenance-request",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "23bc993e-8d8e-4269-9b21-7319996e4a08",
+      "name": "TENANT REQUEST FORM",
+      "webhookId": "594190d5-64ba-4778-b9e5-0bc282599f16",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -6368,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "22676097-25a4-4c8e-9d6a-f4256f6bfdcf",
+              "name": "Ticket ID",
+              "value": "={{ 'TCK-' + $now.format('yyyyMMddHHmmss') }}",
+              "type": "string"
+            },
+            {
+              "id": "051ece12-cd76-4c9a-ab92-9e2d0e1a39f4",
+              "name": "Created At",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "20eec98c-1ebd-4104-bb14-486c0eb669d3",
+              "name": "Updated At",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "f8b8bf26-495c-476f-98f6-305ea926bf78",
+              "name": "Status",
+              "value": "New",
+              "type": "string"
+            },
+            {
+              "id": "37344fb0-8169-4d98-9562-286f08031ea4",
+              "name": "Tenant Name",
+              "value": "={{ $json.body.tenant_name }}",
+              "type": "string"
+            },
+            {
+              "id": "d7249013-d981-4faf-af60-f9756f28f525",
+              "name": "Address",
+              "value": "={{ $json.body.address }}",
+              "type": "string"
+            },
+            {
+              "id": "31a489fe-387a-4262-bcea-b393f5d152fd",
+              "name": "Phone",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "338be25a-0d9b-4ec4-9b06-1422d6a4f42a",
+              "name": "Email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "9cbeb95c-cb2f-469d-a672-d38bc9954750",
+              "name": "Catergory",
+              "value": "={{ $json.body.category }}",
+              "type": "string"
+            },
+            {
+              "id": "abb69b16-8f80-4234-99d9-39672545d060",
+              "name": "Description",
+              "value": "={{ $json.body.description }}",
+              "type": "string"
+            },
+            {
+              "id": "e50e5ae3-7502-4f3d-bca6-1dee814e1eed",
+              "name": "Property ID",
+              "value": "={{ 'PROP-' + $now.format('yyyyMMddHHmmssSSS') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8cafcc72-3db5-4274-8031-8e50b4358e55",
+      "name": "NORMALIZE DATA",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -6160,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tenant Name: {{ $json['Tenant Name'] }}\n\nAddress: {{ $json.Address }}\n\nPhone: {{ $json.Phone }}\n\nEmail: {{ $json.Email }}\n\nCategory: {{ $json.Catergory }}\n\nDescription: {{ $json.Description }}\n\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a property maintenance triage assistant. Classify the tenant's issue.\n\nUrgency levels:\n- Emergency: gas leak, fire hazard, flooding, no heat in freezing weather, no water, electrical hazard, broken lock/security issue\n- High: no AC in hot weather, major appliance failure, significant leak, pest infestation\n- Normal: minor leak, appliance malfunction (not urgent), broken fixture\n- Low: cosmetic issue, minor inconvenience\n\nAlso determine the vendor category needed: Plumber, Electrician, HVAC Technician, General Handyman, Pest Control, Locksmith, Other.\n\nReturn ONLY valid JSON, no other text:\n{\n  \"urgency\": \"Emergency/High/Normal/Low\",\n  \"vendor_category_needed\": \"...\",\n  \"ai_summary\": \"one sentence summary of the issue\"\n}"
+        }
+      },
+      "id": "bfd3f3ff-d8a0-4e46-b3c4-875a59b89854",
+      "name": "AI URGENCY CLASSIFIER",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -5952,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9f3c66a0-e498-49ad-ad7d-e070ce682472",
+              "name": "Urgency",
+              "value": "={{ $json.output.urgency }}",
+              "type": "string"
+            },
+            {
+              "id": "df732824-ec20-4ec0-a681-d383c59fe7a0",
+              "name": "Description",
+              "value": "={{ $json.output.description }}",
+              "type": "string"
+            },
+            {
+              "id": "f68b0f90-a707-4b78-b00e-24203cbca8dc",
+              "name": "Category",
+              "value": "={{ $json.output.vendor_category_needed }}",
+              "type": "string"
+            },
+            {
+              "id": "bcb6ca3c-3ef7-4c7f-8c43-e18848b58dc4",
+              "name": "SLA Deadline",
+              "value": "={{ $json.output.urgency === 'Emergency' ? $now.plus({hours: 1}).toISO() \n   : $json.output.urgency === 'High' ? $now.plus({hours: 4}).toISO() \n   : $json.output.urgency === 'Normal' ? $now.plus({hours: 24}).toISO() \n   : $now.plus({hours: 72}).toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "97f625ea-d51c-49e0-a1d7-49623fffdd3c",
+      "name": "SAVE AI OUTPUT",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -5600,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ticket ID": "={{ $('NORMALIZE DATA').item.json['Ticket ID'] }}",
+            "Created At ": "={{ $('NORMALIZE DATA').item.json['Created At'] }}",
+            "Updated At": "={{ $('NORMALIZE DATA').item.json['Updated At'] }}",
+            "Tenant Name": "={{ $('NORMALIZE DATA').item.json['Tenant Name'] }}",
+            "Phone": "={{ $('NORMALIZE DATA').item.json.Phone }}",
+            "Email": "={{ $('NORMALIZE DATA').item.json.Email }}",
+            "Unit/Property Address": "={{ $('NORMALIZE DATA').item.json.Address }}",
+            "Description": "={{ $('SAVE AI OUTPUT').item.json.Description }}",
+            "Status": "={{ $('NORMALIZE DATA').item.json.Status }}",
+            "Property ID": "={{ $('NORMALIZE DATA').item.json['Property ID'] }}",
+            "Urgency": "={{ $('SAVE AI OUTPUT').item.json.Urgency }}",
+            "SLA Deadline": "={{ $('SAVE AI OUTPUT').item.json['SLA Deadline'] }}",
+            "Escalation Count": "0",
+            "Owner Notified": "Yes",
+            "Category": "={{ $('NORMALIZE DATA').item.json.Catergory }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Ticket ID",
+              "displayName": "Ticket ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Created At ",
+              "displayName": "Created At ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Updated At",
+              "displayName": "Updated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tenant Name",
+              "displayName": "Tenant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Unit/Property Address",
+              "displayName": "Unit/Property Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Property ID",
+              "displayName": "Property ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Assigned Vendor",
+              "displayName": "Assigned Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Phone ",
+              "displayName": "Vendor Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Email",
+              "displayName": "Vendor Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned At",
+              "displayName": "Assigned At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SLA Deadline",
+              "displayName": "SLA Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Resolve At",
+              "displayName": "Resolve At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Escalation Count",
+              "displayName": "Escalation Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Owner Notified",
+              "displayName": "Owner Notified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5f1137b1-2e7b-4548-8dc6-24f0059322d0",
+      "name": "CREATE TICKET",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -5184,
+        976
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Urgency }}",
+                    "rightValue": "Emergency",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2e092656-7f2a-49d2-a15e-f6ef853680fd"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Emergency"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a9481445-4b33-4ad2-bcbb-bb6d6af596af",
+                    "leftValue": "={{ $json.Urgency }}",
+                    "rightValue": "High",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "High"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9a4b91db-9082-45b7-98cb-13fb99eec104",
+                    "leftValue": "={{ $json.Urgency }}",
+                    "rightValue": "Normal",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Normal"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6b2ac315-641a-45c1-85a8-1ee03207ef60",
+                    "leftValue": "={{ $json.Urgency }}",
+                    "rightValue": "Low",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Low"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "589a3eca-9fbe-4310-8426-95ffea2bffb7",
+      "name": "SWITCH (URGENCY)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -4976,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6924199415",
+        "text": "=🚨 EMERGENCY TICKET: {{ $('CREATE TICKET').first().json['Ticket ID'] }}\n\nAddress: {{ $('CREATE TICKET').first().json['Unit/Property Address'] }}\nIssue: {{ $('CREATE TICKET').first().json.Description }}\nEmail: {{ $('CREATE TICKET').first().json.Email }}\nTenant: {{ $('CREATE TICKET').first().json['Tenant Name'] }} — {{ $('CREATE TICKET').first().json.Phone }}\n\n\nSuggested vendor for this ticket (Already Email Sent): \n\n- {{ $('TAKE TOP VENDOR (EMERGENCY)').item.json['Vendor Name'] }} - ({{ $('TAKE TOP VENDOR (EMERGENCY)').item.json.Phone }})\n- {{ $('TAKE TOP VENDOR (EMERGENCY)').item.json.Email }}\n\nCurrently handling  other tickets : {{ $('TAKE TOP VENDOR (EMERGENCY)').item.json['Activatate Ticket Count'] }}\n\n[👉 Assign করতে Click করুন](https://vibeacademy.cloud/form-test/9af2b4bc-33ec-4409-ab13-3687cf858416?Ticket%20ID={{ encodeURIComponent($('CREATE TICKET').first().json['Ticket ID']) }}&Vendor%20Name={{ encodeURIComponent($('TAKE TOP VENDOR (EMERGENCY)').item.json['Vendor Name']) }}&Vendor%20Email={{ encodeURIComponent($('TAKE TOP VENDOR (EMERGENCY)').item.json['Email']) }})\n\n\n",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "98046c8a-18c0-40a7-9db8-6f740e69a726",
+      "name": "EMERGENCY ALERT",
+      "webhookId": "872b2c12-527b-4314-9be8-1b9ac87402bf",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -3616,
+        592
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "I4hRuPuOPPBWFBYT",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1723386138,
+          "mode": "list",
+          "cachedResultName": "VENDORS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=1723386138"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Active"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d3f29d16-d855-4f72-a845-2a21d44f9511",
+      "name": "GET ACTIVE VENDORS",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4656,
+        592
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3f6d3ac4-33d6-4a3a-a9a7-344bcb8ff5ca",
+              "leftValue": "={{ $json.Category }}",
+              "rightValue": "={{ $('SAVE AI OUTPUT').first().json['Category'] }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "215375e7-1e0e-465e-bc73-f2cb7c23a2ab",
+      "name": "FILTER BY CATEGORY",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -4464,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "=🚨 Emergency Request — {{ $('CREATE TICKET').first().json['Ticket ID'] }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #222;\">\n  <p>Hi {{ $json['Vendor Name'] }},</p>\n\n  <p>An emergency maintenance issue was just reported:</p>\n\n  <p>\n    <strong>Name:</strong> {{ $('CREATE TICKET').item.json['Tenant Name'] }}<br>\n    <strong>Phone:</strong> {{ $('CREATE TICKET').item.json.Phone }}<br>\n    <strong>Address:</strong> {{ $('CREATE TICKET').first().json['Unit/Property Address'] }}<br>\n    <strong>Issue:</strong> {{ $('CREATE TICKET').first().json.Description }}<br>\n    <strong>Urgency:</strong> {{ $('CREATE TICKET').item.json.Urgency }}\n  </p>\n\n  <p>Please respond or head over as soon as possible.</p>\n\n  <p>\n    <strong>Mark as resolved when done:</strong><br>\n    <a href=\"https://vibeacademy.cloud/webhook-test/vendor-resolve?ticket_id={{ $('CREATE TICKET').first().json['Ticket ID'] }}\">\n      Mark Ticket as Resolved\n    </a>\n  </p>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "58ac401e-0049-43e9-bc44-6ad7cf82ea28",
+      "name": "NOTIFY EMERGENCY VENDOR",
+      "webhookId": "b8b936f7-e59f-4cb1-8c1d-8fc913456eac",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -3840,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "minutes"
+      },
+      "id": "336d1d7d-7eaf-4b08-beb0-1cc10eadbfad",
+      "name": "WAIT",
+      "webhookId": "223d2b2c-ab17-4e9d-8d98-bc4dbde7f821",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3392,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Ticket ID",
+              "lookupValue": "={{ $('CREATE TICKET').first().json['Ticket ID'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "76e57a8a-48cb-49b8-ac9a-891dc942a12e",
+      "name": "LOOKUP TICKET STATUS",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3200,
+        592
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "279e3f87-e432-4eb6-bb5e-1aae30130e4c",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "New",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d5e41561-7999-4a0d-8d54-ccf43f2f705a",
+      "name": "IF (STILL NOT ASSIGNED)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "alwaysOutputData": true,
+      "position": [
+        -2992,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6924199415",
+        "text": "=⚠️ Emergency Ticket: {{ $json['Ticket ID'] }}.\n\nAddress: {{ $json['Unit/Property Address'] }}\nIssue: {{ $json.Description }}\nEmail: {{ $json.Email }}\nTenant: {{ $json['Tenant Name'] }} — {{ $json.Phone }}\n\nVendor was: {{ $('TAKE TOP VENDOR (EMERGENCY)').first().json['Vendor Name'] }}\nPhone: {{ $('TAKE TOP VENDOR (EMERGENCY)').first().json.Phone }}\nEmail: {{ $('TAKE TOP VENDOR (EMERGENCY)').first().json.Email }}\n\nNo one has received it yet (already 10 minutes over). Look into this matter right now.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "fb367d2d-125e-4943-8284-1e2d102e4ca1",
+      "name": "ESCALATE TO OWNER",
+      "webhookId": "9f21bdd8-c586-487b-8e11-97fc92e92fac",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2752,
+        576
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "I4hRuPuOPPBWFBYT",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3f6d3ac4-33d6-4a3a-a9a7-344bcb8ff5ca",
+              "leftValue": "={{ $json.Category }}",
+              "rightValue": "={{ $('SAVE AI OUTPUT').item.json.Category }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "36c7f5ac-efd7-4773-b0ad-8232eb594154",
+      "name": "FILTER BY CATEGORY (HIGH)",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -4464,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1723386138,
+          "mode": "list",
+          "cachedResultName": "VENDORS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=1723386138"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Active"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a094af17-1171-4e78-a56c-c4331b4d41aa",
+      "name": "GET ACTIVE VENDORS(HIGH)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4656,
+        816
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "Activatate Ticket Count"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "916e4145-4ec1-4687-8f32-a3e7c88d8bf1",
+      "name": "SORT BY LOAD (EMERGENCY)",
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        -4256,
+        592
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "ed70b971-994b-4f16-b9b6-3255778aa9e0",
+      "name": "TAKE TOP VENDOR (EMERGENCY)",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -4048,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "Activatate Ticket Count"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6f010816-beda-4e56-91a7-f48596621128",
+      "name": "SORT BY LOAD (HIGH)",
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        -4256,
+        816
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "70c30001-c45b-461f-aea6-0703a3cb9df3",
+      "name": "TAKE TOP VENDOR (HIGH)",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -4048,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 4,
+        "unit": "hours"
+      },
+      "id": "fe6e2335-ccb9-4792-b304-77c7d1ab09a6",
+      "name": "WAIT1",
+      "webhookId": "223d2b2c-ab17-4e9d-8d98-bc4dbde7f821",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3616,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "279e3f87-e432-4eb6-bb5e-1aae30130e4c",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "New",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b90945bc-049f-4d11-99dc-4f619d42c7b4",
+      "name": "IF (NOT ASSIGNED - HIGH)1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "alwaysOutputData": true,
+      "position": [
+        -3184,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6924199415",
+        "text": "=⚠️ Emergency Ticket: {{ $json['Ticket ID'] }}.\n\nAddress: {{ $json['Unit/Property Address'] }}\nIssue: {{ $json.Description }}\nEmail: {{ $json.Email }}\nTenant: {{ $json['Tenant Name'] }} — {{ $json.Phone }}\n\nVendor was: {{ $('TAKE TOP VENDOR (HIGH)').item.json['Vendor Name'] }}\nPhone: {{ $('TAKE TOP VENDOR (EMERGENCY)').first().json.Phone }}\n\nNo one has received it yet (already 2 hours over). Look into this matter right now.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "6dc9c578-fc40-44e4-a9ac-02269a6bdab4",
+      "name": "ESCALATE TO OWNER1",
+      "webhookId": "9f21bdd8-c586-487b-8e11-97fc92e92fac",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2960,
+        800
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "I4hRuPuOPPBWFBYT",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ticket ID": "={{ $('CREATE TICKET').first().json['Ticket ID'] }}",
+            "Updated At": "={{ $now.toISO() }}",
+            "Status": "Queued"
+          },
+          "matchingColumns": [
+            "Ticket ID"
+          ],
+          "schema": [
+            {
+              "id": "Ticket ID",
+              "displayName": "Ticket ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Created At ",
+              "displayName": "Created At ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Updated At",
+              "displayName": "Updated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tenant Name",
+              "displayName": "Tenant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Unit/Property Address",
+              "displayName": "Unit/Property Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Property ID",
+              "displayName": "Property ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Catergory",
+              "displayName": "Catergory",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Assigned Vendor",
+              "displayName": "Assigned Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Phone ",
+              "displayName": "Vendor Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Email",
+              "displayName": "Vendor Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned At",
+              "displayName": "Assigned At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SLA Deadline",
+              "displayName": "SLA Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Resolve At",
+              "displayName": "Resolve At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Escalation Count",
+              "displayName": "Escalation Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Owner Notified",
+              "displayName": "Owner Notified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "545a5350-58b2-4eb5-a57d-f10b35ff9494",
+      "name": "UPDATE STATUS - QUEUED",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4640,
+        1120
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ticket ID": "={{ $('CREATE TICKET').first().json['Ticket ID'] }}",
+            "Updated At": "={{ $now.toISO() }}",
+            "Status": "Queued-Low"
+          },
+          "matchingColumns": [
+            "Ticket ID"
+          ],
+          "schema": [
+            {
+              "id": "Ticket ID",
+              "displayName": "Ticket ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Created At ",
+              "displayName": "Created At ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Updated At",
+              "displayName": "Updated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tenant Name",
+              "displayName": "Tenant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Unit/Property Address",
+              "displayName": "Unit/Property Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Property ID",
+              "displayName": "Property ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Catergory",
+              "displayName": "Catergory",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Assigned Vendor",
+              "displayName": "Assigned Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Phone ",
+              "displayName": "Vendor Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Email",
+              "displayName": "Vendor Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned At",
+              "displayName": "Assigned At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SLA Deadline",
+              "displayName": "SLA Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Resolve At",
+              "displayName": "Resolve At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Escalation Count",
+              "displayName": "Escalation Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Owner Notified",
+              "displayName": "Owner Notified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "eaba8121-b824-4566-82b3-edc782bf2c46",
+      "name": "UPDATE STATUS - QUEUED LOW",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4640,
+        1296
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Assigned Vendor": "={{ $json['Vendor Name'] }}",
+            "Assigned At": "={{ $now.toISO() }}",
+            "Status": "Assigned",
+            "Ticket ID": "={{ $json['Ticket ID'] }}",
+            "Vendor Email": "={{ $json['Vendor Email'] }}"
+          },
+          "matchingColumns": [
+            "Ticket ID"
+          ],
+          "schema": [
+            {
+              "id": "Ticket ID",
+              "displayName": "Ticket ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Created At ",
+              "displayName": "Created At ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Updated At",
+              "displayName": "Updated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tenant Name",
+              "displayName": "Tenant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Unit/Property Address",
+              "displayName": "Unit/Property Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Property ID",
+              "displayName": "Property ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Assigned Vendor",
+              "displayName": "Assigned Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Vendor Phone ",
+              "displayName": "Vendor Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Email",
+              "displayName": "Vendor Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Assigned At",
+              "displayName": "Assigned At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "SLA Deadline",
+              "displayName": "SLA Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Resolve At",
+              "displayName": "Resolve At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Escalation Count",
+              "displayName": "Escalation Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Owner Notified",
+              "displayName": "Owner Notified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d5e3dad4-ecd9-4677-b3b7-46fa7c38df6c",
+      "name": "ASSIGN TICKET - UPDATE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -6192,
+        1600
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Vendor Email'] }}",
+        "subject": "=Ticket Assigned: {{ $json['Ticket ID'] }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #222;\">\n  <p>Please resolve this ticket: \n    <strong>{{ $('ASSIGN VENDOR').first().json['Ticket ID'] }}</strong>\n  </p>\n\n  <p>\n    <strong>Name:</strong> {{ $json['Tenant Name'] }}<br>\n    <strong>Phone:</strong> {{ $json.Phone }}<br>\n    <strong>Address:</strong> {{ $json['Unit/Property Address'] }}<br>\n    <strong>Issue:</strong> {{ $json.Description }}\n  </p>\n\n  <p>\n    <strong>When done, click here:</strong><br>\n    <a href=\"https://782-1285.n8n-2.dignityhost.com/webhook-test/vendor-resolve?ticket_id={{ $json['Ticket ID'] }}\">\n      Mark Ticket as Resolved\n    </a>\n  </p>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "3747b611-beb0-4872-8afc-97646b2ca8e0",
+      "name": "NOTIFY VENDOR - ASSIGNED",
+      "webhookId": "2b3f1b93-8e15-4617-b312-c92f90201f29",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -5808,
+        1600
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "vendor-resolve",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ae39aedd-77fc-46f4-bdb5-f96be8eb5eb3",
+      "name": "VENDOR RESOLVE WEBHOOK",
+      "webhookId": "594190d5-64ba-4778-b9e5-0bc282599f16",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -5120,
+        1600
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Ticket ID",
+              "lookupValue": "={{ $json.query.ticket_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ce475201-8b1f-4a2e-917b-47e681df70a0",
+      "name": "LOOKUP TICKET FOR RESOLVE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4864,
+        1600
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Closed",
+            "Ticket ID": "={{ $json['Ticket ID'] }}",
+            "Resolve At": "={{ $now.toISO() }}",
+            "Category": "={{ $json.Catergory }}"
+          },
+          "matchingColumns": [
+            "Ticket ID"
+          ],
+          "schema": [
+            {
+              "id": "Ticket ID",
+              "displayName": "Ticket ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Created At ",
+              "displayName": "Created At ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Updated At",
+              "displayName": "Updated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tenant Name",
+              "displayName": "Tenant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Unit/Property Address",
+              "displayName": "Unit/Property Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Property ID",
+              "displayName": "Property ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Assigned Vendor",
+              "displayName": "Assigned Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Phone ",
+              "displayName": "Vendor Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Email",
+              "displayName": "Vendor Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned At",
+              "displayName": "Assigned At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SLA Deadline",
+              "displayName": "SLA Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Resolve At",
+              "displayName": "Resolve At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Escalation Count",
+              "displayName": "Escalation Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Owner Notified",
+              "displayName": "Owner Notified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0534e450-d0e6-4803-9b60-d690ba25d95d",
+      "name": "MARK RESOLVED",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4624,
+        1600
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<h2>Thank you! Marked as resolved.</h2>",
+        "options": {}
+      },
+      "id": "5e0b4db4-35ac-4dba-821e-53306e9d67cd",
+      "name": "VENDOR RESOLVE RESPONSE",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -4416,
+        1600
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('LOOKUP TICKET FOR RESOLVE').item.json.Email }}",
+        "subject": "=Was your issue resolved? — {{ $('MARK RESOLVED').item.json['Ticket ID'] }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #222;\">\n  <p>Hi {{ $('LOOKUP TICKET FOR RESOLVE').item.json['Tenant Name'] }},</p>\n\n  <p>\n    Your reported maintenance problem was:\n    <strong>{{ $('LOOKUP TICKET FOR RESOLVE').item.json.Description }}</strong>\n  </p>\n\n  <p>\n    <strong>Ticket:</strong> {{ $('MARK RESOLVED').item.json['Ticket ID'] }}\n  </p>\n\n  <p>Has your problem been solved?</p>\n\n  <p>\n    <a href=\"https://782-1285.n8n-2.dignityhost.com/webhook-test/tenant-confirm?ticket_id={{ $('MARK RESOLVED').item.json['Ticket ID'] }}&answer=yes\">\n      Yes, my problem is solved\n    </a>\n    <br><br>\n    <a href=\"https://782-1285.n8n-2.dignityhost.com/webhook-test/tenant-confirm?ticket_id={{ $('MARK RESOLVED').item.json['Ticket ID'] }}&answer=no\">\n      No, my problem is not solved\n    </a>\n  </p>\n\n  <p>\n    Thank you,<br>\n    <strong>Horizon Realty Prime Team</strong>\n  </p>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "8360264e-0a3d-4d53-ab41-8738250d0231",
+      "name": "ASK TENANT CONFIRMATION",
+      "webhookId": "ff750c6b-be98-4094-b48f-a428d34d2dca",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -3776,
+        1600
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "tenant-confirm",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "da19034e-c307-4f52-a2eb-af1bcc1df7e0",
+      "name": "TENANT CONFIRM WEBHOOK",
+      "webhookId": "594190d5-64ba-4778-b9e5-0bc282599f16",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3488,
+        1616
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6ca1ba86-5dfc-47c0-bc73-f54d163d94bd",
+              "leftValue": "={{ $json.query.answer }}",
+              "rightValue": "Yes",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "id": "7f4dedbe-0e84-4148-9e30-33a908a61e9f",
+      "name": "IF (TENANT SAYS YES)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3280,
+        1616
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Closed",
+            "Ticket ID": "={{ $('TENANT CONFIRM WEBHOOK').item.json.query.ticket_id }}"
+          },
+          "matchingColumns": [
+            "Ticket ID"
+          ],
+          "schema": [
+            {
+              "id": "Ticket ID",
+              "displayName": "Ticket ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Created At ",
+              "displayName": "Created At ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Updated At",
+              "displayName": "Updated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tenant Name",
+              "displayName": "Tenant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Unit/Property Address",
+              "displayName": "Unit/Property Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Property ID",
+              "displayName": "Property ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Assigned Vendor",
+              "displayName": "Assigned Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Phone ",
+              "displayName": "Vendor Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Email",
+              "displayName": "Vendor Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned At",
+              "displayName": "Assigned At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SLA Deadline",
+              "displayName": "SLA Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Resolve At",
+              "displayName": "Resolve At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Escalation Count",
+              "displayName": "Escalation Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Owner Notified",
+              "displayName": "Owner Notified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "6efcfe05-f285-4126-a6d3-5f5df0c50e4a",
+      "name": "UPDATE TENANT COFIRMATION",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3072,
+        1520
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Reopened",
+            "Ticket ID": "={{ $('TENANT CONFIRM WEBHOOK').item.json.query.ticket_id }}"
+          },
+          "matchingColumns": [
+            "Ticket ID"
+          ],
+          "schema": [
+            {
+              "id": "Ticket ID",
+              "displayName": "Ticket ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Created At ",
+              "displayName": "Created At ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Updated At",
+              "displayName": "Updated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tenant Name",
+              "displayName": "Tenant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Unit/Property Address",
+              "displayName": "Unit/Property Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Property ID",
+              "displayName": "Property ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Assigned Vendor",
+              "displayName": "Assigned Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Phone ",
+              "displayName": "Vendor Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Email",
+              "displayName": "Vendor Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned At",
+              "displayName": "Assigned At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SLA Deadline",
+              "displayName": "SLA Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Resolve At",
+              "displayName": "Resolve At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Escalation Count",
+              "displayName": "Escalation Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Owner Notified",
+              "displayName": "Owner Notified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "bc03b7e4-b76c-42d9-afe7-321a0e4abab9",
+      "name": "UPDATE TENANT COFIRMATION1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3088,
+        1776
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<h2>Thank you for your feedback!</h2>",
+        "options": {}
+      },
+      "id": "6a5b65ae-7d99-4d59-9731-24a76d1c0206",
+      "name": "TENANT CONFIRM RESPONSE",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -2832,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "Assign Vendor to Ticket",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Ticket ID"
+            },
+            {
+              "fieldLabel": "Vendor Name"
+            },
+            {
+              "fieldLabel": "Vendor Email"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Thanks for Submitting"
+            }
+          }
+        }
+      },
+      "id": "fea5c9d5-2a83-4ec6-923e-42e22158c6ea",
+      "name": "ASSIGN VENDOR",
+      "webhookId": "f45812b8-19f1-4cf1-85c8-acff515f09bf",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -6400,
+        1600
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6924199415",
+        "text": "=⚠️ High Priority Ticket: {{ $('CREATE TICKET').first().json['Ticket ID'] }}\n\nAddress: {{ $('CREATE TICKET').first().json['Unit/Property Address'] }}\nIssue: {{ $('CREATE TICKET').first().json.Description }}\nEmail: {{ $('CREATE TICKET').first().json.Email }}\nTenant: {{ $('CREATE TICKET').first().json['Tenant Name'] }} — {{ $json.Phone }}\n\n\nSuggested vendor for this ticket: \n\n{{ $json['Vendor Name'] }} - ({{ $json.Phone }})\nCurrently handling  other tickets : {{ $json['Activatate Ticket Count'] }}\n\n[👉 Assign করতে Click করুন](https://782-1285.n8n-2.dignityhost.com/form-test/f45812b8-19f1-4cf1-85c8-acff515f09bf?Ticket%20ID={{ encodeURIComponent($('CREATE TICKET').first().json['Ticket ID']) }}&Vendor%20Name={{ encodeURIComponent($('TAKE TOP VENDOR (HIGH)').first().json['Vendor Name']) }}&Vendor%20Email={{ encodeURIComponent($('TAKE TOP VENDOR (HIGH)').first().json['Email']) }})\n\n\n👉Please assign a vendor today.",
+        "additionalFields": {}
+      },
+      "id": "f1c012b4-7324-496f-846f-458a672ce4e7",
+      "name": "HIGH PRIORITY ALERT1",
+      "webhookId": "872b2c12-527b-4314-9be8-1b9ac87402bf",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -3856,
+        816
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "I4hRuPuOPPBWFBYT",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Ticket ID",
+              "lookupValue": "={{ $('CREATE TICKET').first().json['Ticket ID'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fff17103-8a3f-4bbc-a2c5-fab6d3c47a46",
+      "name": "LOOKUP STATUS (HIGH)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3392,
+        816
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Ticket ID",
+              "lookupValue": "={{ $('ASSIGN VENDOR').item.json['Ticket ID'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4e3f3256-c28c-43fc-807c-027dc0f032da",
+      "name": "GET TENANT LIST",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -6000,
+        1600
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Queued"
+            },
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Queued-Low"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "id": "90b93a5f-a461-4b47-b245-51c7573323c0",
+      "name": "GET QUEUED TICKETS",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -6208,
+        2144
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1723386138,
+          "mode": "list",
+          "cachedResultName": "VENDORS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=1723386138"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $('ASSIGN TICKET - UPDATE').item.json['Vendor Email'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "09d560bc-ae1b-4643-aeaa-4a3de3aa463b",
+      "name": "GET VENDOR CURRENT COUNT",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -5600,
+        1600
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1723386138,
+          "mode": "list",
+          "cachedResultName": "VENDORS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=1723386138"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.Email }}",
+            "Activatate Ticket Count": "={{ $json['Activatate Ticket Count'] + 1 }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Vendor Name",
+              "displayName": "Vendor Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Activatate Ticket Count",
+              "displayName": "Activatate Ticket Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d1a8dbe9-527f-497b-9e17-128b68014a05",
+      "name": "INCREMENT VENDOR COUNT",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -5392,
+        1600
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1723386138,
+          "mode": "list",
+          "cachedResultName": "VENDORS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=1723386138"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $('LOOKUP TICKET FOR RESOLVE').item.json['Vendor Email'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f7989311-d1d4-4530-bf2a-25c01a00ca83",
+      "name": "GET VENDOR FOR DECREMENT",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4224,
+        1600
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1723386138,
+          "mode": "list",
+          "cachedResultName": "VENDORS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=1723386138"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.Email }}",
+            "Activatate Ticket Count": "={{ $json['Activatate Ticket Count'] - 1 }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Vendor Name",
+              "displayName": "Vendor Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Activatate Ticket Count",
+              "displayName": "Activatate Ticket Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c6700d3d-93d5-49fc-8e32-bd027cf7ab34",
+      "name": "DECREMENT VENDOR COUNT",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3984,
+        1600
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "6594eb99-2a51-41d8-a58c-ac62ea513a91",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -6000,
+        2144
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1723386138,
+          "mode": "list",
+          "cachedResultName": "VENDORS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=1723386138"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Active"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "39a01ebf-3ab1-488c-8acc-de3b15387a3f",
+      "name": "GET ACTIVE VENDORS (FOR DIGEST)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -5744,
+        2160
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c82b834c-14cf-486d-b598-3c0508c57a91",
+              "leftValue": "={{ $json.Category }}",
+              "rightValue": "={{ $('Loop Over Items').item.json.Category }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "299eeb6b-928c-4f74-9b56-818d6b2a96c3",
+      "name": "FILTER BY CATEGORY (DIGEST)",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -5536,
+        2160
+      ]
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "Activatate Ticket Count"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3acddce7-82f6-4616-b8e6-3519d0caf37b",
+      "name": "SORT BY LOAD (DIGEST)",
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        -5328,
+        2160
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "007ba826-51fc-42c2-b13b-60dbf8fc5797",
+      "name": "TAKE TOP VENDOR (DIGEST)",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -5120,
+        2160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const ticket = $('Loop Over Items').item.json;\n\nif (!$json.hasOwnProperty('Vendor Name')) {\n  const line = `🔧 ${ticket['Ticket ID']} | ${ticket['Category']} | ${ticket['Address']}\\n` +\n               `   Issue: ${ticket['Description']}\\n` +\n               `   ⚠️ কোনো Active vendor পাওয়া যায়নি এই category-তে!\\n`;\n  return [{ json: { line } }];\n}\n\nconst vendor = $json;\nconst baseUrl = 'https://782-1285.n8n-2.dignityhost.com/form-test/f45812b8-19f1-4cf1-85c8-acff515f09bf';\n\nconst paramObj = {\n  'Ticket ID': ticket['Ticket ID'],\n  'Vendor Name': vendor['Vendor Name'],\n  'Vendor Email': vendor['Email']\n};\n\nconst queryString = Object.entries(paramObj)\n  .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)\n  .join('&');\n\nconst assignLink = `${baseUrl}?${queryString}`;\n\nconst line = `🔧 ${ticket['Ticket ID']} | ${ticket['Category']} | ${ticket['Unit/Property Address']}\\n` +\n             `   Issue: ${ticket['Description']}\\n` +\n             `   Suggested: ${vendor['Vendor Name']} (${vendor['Phone']})\\n` +\n             `   👉 Assign: ${assignLink}\\n`;\n\nreturn [{ json: { line } }];"
+      },
+      "id": "9ba6c650-7b81-486a-9da7-316afdd4ef89",
+      "name": "BUILD DIGEST LINE",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4912,
+        2160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\n\nif (allItems.length === 0) {\n  return [{ json: { message: null } }];\n}\n\nconst allLines = allItems.map(item => item.json.line).join('\\n');\nconst message = `📋 Today's queued maintenance requests (${allItems.length}):\\n\\n${allLines}`;\n\nreturn [{ json: { message } }];"
+      },
+      "id": "c3bb4e43-d880-4123-b2b0-6b2b68e12978",
+      "name": "COMBINE ALL LINES",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5776,
+        2000
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6924199415",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "32d7fcca-8c84-41d5-a382-607c033baf70",
+      "name": "SEND DAILY DIGEST",
+      "webhookId": "b7fd7b5b-9504-4238-9576-a7b7ae471f01",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -5568,
+        2000
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "I4hRuPuOPPBWFBYT",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "9e3d7026-6365-43da-92cf-5429ec3d396a",
+      "name": "SLA MONITOR",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -4624,
+        2160
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "2cce3efd-5edf-4533-926a-e0cd5204ab15",
+      "name": "DAILY QUEUE DIGEST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -6416,
+        2144
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "a5d7304a-938e-4d63-b2af-9530ddf6e560",
+      "name": "GET All TICKETS",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4432,
+        2160
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "018d4c15-f58d-419b-a2ea-24dbaf2d6f3c",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Closed",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "aa9d2b40-345d-4de6-977c-56656f6efa71",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Resolved",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "5fd1b5a5-1354-481b-bf65-b1f7018fc63e",
+              "leftValue": "={{ $json['Resolve At'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "id": "f47db1e6-9244-475e-bef5-89138321f9e9",
+      "name": "EXCLUDE RESOLVED CLOSED",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -4224,
+        2160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b8745969-5b6a-4eba-8850-e38bd83651b9",
+              "leftValue": "={{ new Date() > new Date($json['SLA Deadline']) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "935b251a-892a-4fc1-b85e-7bfa9326a7ae",
+      "name": "FIND OVERDUE",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -4016,
+        2160
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "12f515e6-1d6e-40dd-8f6d-9cdaa1cf74b5",
+      "name": "Loop Over Items1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -3808,
+        2160
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6924199415",
+        "text": "=⚠️ Ticket: {{ $('GET All TICKETS').first().json['Ticket ID'] }}.\n\nTenant Name: {{ $('GET All TICKETS').first().json['Tenant Name'] }}\nTenant Phone: {{ $('GET All TICKETS').first().json.Phone }}\nTenant Address: {{ $('GET All TICKETS').first().json['Unit/Property Address'] }}\n\nYet Overdue! Urgency: {{ $('GET All TICKETS').first().json.Urgency }}, Escalated {{ $('GET All TICKETS').first().json['Escalation Count'] }} Before।\n\nSuggested Vendor:\nVendor Name: {{ $json['Vendor Name'] }}\nVendor Email: {{ $json.Email }}\nVendor Phone: {{ $json.Phone }}\n\n👉 Assign Here:\nhttps://782-1285.n8n-2.dignityhost.com/form-test/f45812b8-19f1-4cf1-85c8-acff515f09bf?Ticket%20ID={{ encodeURIComponent($('GET All TICKETS').first().json['Ticket ID']) }}&Vendor%20Name={{ encodeURIComponent($json['Vendor Name']) }}&Vendor%20Email={{ encodeURIComponent($json.Email) }}",
+        "additionalFields": {}
+      },
+      "id": "af11bbd3-66e3-4d99-a426-b82909d1970d",
+      "name": "ESCALATION ALERT",
+      "webhookId": "89781e25-f567-49d0-b0e5-2204fb5c16a5",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2768,
+        2176
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "I4hRuPuOPPBWFBYT",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ticket ID": "={{ $('Loop Over Items1').item.json['Ticket ID'] }}",
+            "Escalation Count": "={{ $('Loop Over Items1').item.json['Escalation Count'] + 1 }}"
+          },
+          "matchingColumns": [
+            "Ticket ID"
+          ],
+          "schema": [
+            {
+              "id": "Ticket ID",
+              "displayName": "Ticket ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Created At ",
+              "displayName": "Created At ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Updated At",
+              "displayName": "Updated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tenant Name",
+              "displayName": "Tenant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Unit/Property Address",
+              "displayName": "Unit/Property Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Property ID",
+              "displayName": "Property ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned Vendor",
+              "displayName": "Assigned Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Phone ",
+              "displayName": "Vendor Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Email",
+              "displayName": "Vendor Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned At",
+              "displayName": "Assigned At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SLA Deadline",
+              "displayName": "SLA Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Resolve At",
+              "displayName": "Resolve At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Escalation Count",
+              "displayName": "Escalation Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Owner Notified",
+              "displayName": "Owner Notified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "15c5e78b-ba62-44e5-a076-c14ef0707a6d",
+      "name": "INCREMENT ESCALATION COUNT",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2496,
+        2176
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "588cea65-acd1-409f-b06c-ca80bacf4d40",
+      "name": "OWNER WEEKLY REPORT",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -6416,
+        2688
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "5b7e136f-c58e-4a2f-924f-83706a47e509",
+      "name": "GET WEEK TICKETS",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -6208,
+        2688
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2562e3be-21ee-4268-a35c-a485ecffbc2f",
+              "leftValue": "={{ $json['Created At '] }}",
+              "rightValue": "={{ $now.minus({days: 7}).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "248497bc-1b4d-43ea-8169-5cd50a711f9c",
+      "name": "FILTER LAST 7 DAYS",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -6000,
+        2688
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "meheraz.txt@gmail.com",
+        "subject": "=Weekly Maintenance Report — {{ $now.format('MMM d, yyyy') }}",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "02f353ad-f6a2-4722-9015-50b4f4da52de",
+      "name": "SEND OWNER REPORT",
+      "webhookId": "c8efaa22-04d0-4d2e-b136-551518c6f49b",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -5520,
+        2688
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0h9nnVTpxgX2Ugd2",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const tickets = $input.all().map(item => item.json);\nconst total = tickets.length;\n\nfunction countBy(field) {\n  const counts = {};\n  for (const t of tickets) {\n    const key = t[field] || 'Unknown';\n    counts[key] = (counts[key] || 0) + 1;\n  }\n  return counts;\n}\n\nconst byUrgency = countBy('Urgency');\nconst byCategory = countBy('Category');\nconst byStatus = countBy('Status');\n\nfunction rowsHtml(counts) {\n  return Object.entries(counts)\n    .map(([k, v]) => `\n      <tr>\n        <td style=\"padding:8px 14px;border:1px solid #e5e7eb;\">${k}</td>\n        <td style=\"padding:8px 14px;border:1px solid #e5e7eb;text-align:center;\">${v}</td>\n      </tr>`)\n    .join('');\n}\n\nfunction tableHtml(title, counts) {\n  return `\n    <h3 style=\"color:#111827;font-family:Arial,sans-serif;margin-top:24px;\">${title}</h3>\n    <table style=\"border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:14px;\">\n      <tr style=\"background:#f3f4f6;\">\n        <th style=\"padding:8px 14px;border:1px solid #e5e7eb;text-align:left;\">${title.replace('By ', '')}</th>\n        <th style=\"padding:8px 14px;border:1px solid #e5e7eb;\">Count</th>\n      </tr>\n      ${rowsHtml(counts)}\n    </table>`;\n}\n\nconst html = `\n<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;\">\n  <h2 style=\"color:#1a56db;margin-bottom:4px;\">Weekly Maintenance Report</h2>\n  <p style=\"color:#6b7280;font-size:13px;margin-top:0;\">\n  ${$now.minus({days:7}).toFormat('MMM d')} - ${$now.toFormat('MMM d, yyyy')}\n</p>\n  <p style=\"font-size:16px;\">Total tickets this week: <strong>${total}</strong></p>\n\n  ${tableHtml('By Urgency', byUrgency)}\n  ${tableHtml('By Category', byCategory)}\n  ${tableHtml('By Status', byStatus)}\n\n  <p style=\"color:#9ca3af;font-size:12px;margin-top:32px;border-top:1px solid #e5e7eb;padding-top:12px;\">\n    Horizon Prime Realty — Automated Weekly Report\n  </p>\n</div>\n`;\n\nreturn [{ json: { html } }];"
+      },
+      "id": "cedb37a4-e292-4ad6-a8b8-23679343a83b",
+      "name": "BUILD REPORT HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5792,
+        2688
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "13833f79-8e60-4ba5-9742-74c1c86e4cbd",
+      "name": "AUTO CLOSE MONITOR",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -5168,
+        2688
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Resolved"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c5ef8d84-8d5c-4335-99a9-fffe62c5eea7",
+      "name": "GET RESOLVED TICKETS",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4960,
+        2688
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2562e3be-21ee-4268-a35c-a485ecffbc2f",
+              "leftValue": "={{ new Date() - new Date($json['Resolved At']) > 172800000 }}",
+              "rightValue": "={{ $now.minus({days: 7}).toISO() }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "07a46ae3-f402-4c61-b0dd-1a735f235f80",
+      "name": "OLDER THAN 48H",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -4736,
+        2688
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Closed"
+          },
+          "matchingColumns": [
+            "Status"
+          ],
+          "schema": [
+            {
+              "id": "Ticket ID",
+              "displayName": "Ticket ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Created At ",
+              "displayName": "Created At ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Updated At",
+              "displayName": "Updated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tenant Name",
+              "displayName": "Tenant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Unit/Property Address",
+              "displayName": "Unit/Property Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Property ID",
+              "displayName": "Property ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Assigned Vendor",
+              "displayName": "Assigned Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Phone ",
+              "displayName": "Vendor Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Vendor Email",
+              "displayName": "Vendor Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned At",
+              "displayName": "Assigned At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SLA Deadline",
+              "displayName": "SLA Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Resolve At",
+              "displayName": "Resolve At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Escalation Count",
+              "displayName": "Escalation Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Owner Notified",
+              "displayName": "Owner Notified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "3018176d-eb20-446c-abf4-5a52f3cec8ac",
+      "name": "AUTO CLOSE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4528,
+        2688
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "TICKETS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MMHrBkdbW9RAdvHvuu9cW5lQJnD84f4Usm3u3rr4keU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Ticket ID",
+              "lookupValue": "={{ $('TENANT CONFIRM WEBHOOK').item.json.query.ticket_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b89dd657-3c5d-4aca-93b1-7bf878647d52",
+      "name": "GET TENANT INFO",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2880,
+        1776
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "6924199415",
+        "text": "=🚨 COMPLAINT TO MANAGER\n\nTicket ID: {{ $json['Ticket ID'] }}\nTenant: {{ $json['Tenant Name'] }}\nProblem:\n{{ $json['Description'] }}\n\n❌ Status: Problem NOT Resolved\n\nResolved/Assigned Vendor:\n{{ $json['Assigned Vendor'] }}\nVendor Email:\n{{ $json['Vendor Email'] }}\nAssigned At: {{ $json['Assigned At'] }}\n\nThe assigned vendor has marked/handled this ticket, but the tenant's problem is still not resolved.\n\n👉 Assign this ticket to this vendor again:\nhttps://vibeacademy.cloud/form-test/9af2b4bc-33ec-4409-ab13-3687cf858416?Ticket%20ID={{ encodeURIComponent($json['Ticket ID']) }}&Vendor%20Name={{ encodeURIComponent($json['Assigned Vendor']) }}&Vendor%20Email={{ encodeURIComponent($json['Vendor Email']) }}",
+        "additionalFields": {}
+      },
+      "id": "8bc6f5e2-7862-4511-9235-e975d4deb106",
+      "name": "COMPLAIN TO MANAGER",
+      "webhookId": "a3f61475-f435-462c-93a8-a7e7245082c3",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2672,
+        1776
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "I4hRuPuOPPBWFBYT",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU",
+          "mode": "list",
+          "cachedResultName": "TENANT MAINTAINANCE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1723386138,
+          "mode": "list",
+          "cachedResultName": "VENDORS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VXvSDAARA6iDX9fuc504_zdsdp3P_P45G2nEZ9SH5ZU/edit#gid=1723386138"
+        },
+        "options": {}
+      },
+      "id": "775e73b0-f8bd-4dc5-8a20-8100bd146729",
+      "name": "GET ACTIVE VENDORS FOR SLA",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3600,
+        2176
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "z7fHM2RZ6taJD8cJ",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea5bd93b-8fdc-4340-b010-4b1568c99c6b",
+              "leftValue": "={{ $('Loop Over Items1').item.json.Category }}",
+              "rightValue": "={{ $json.Category }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a9e33e88-e264-47d3-aa05-fd37485dddcb",
+      "name": "MATCH VENDOR",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -3408,
+        2176
+      ]
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "Activatate Ticket Count"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "951df81c-1448-4e63-99fa-0e544dfd476e",
+      "name": "Sort",
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        -3200,
+        2176
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "6f07af43-eca6-412b-9936-5ecb94eab02d",
+      "name": "Limit",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -2992,
+        2176
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 📋 SETUP GUIDE — Maintenance / Tenant Ticket System\n\n## How It Works\nA complete tenant maintenance request system with AI triage, vendor auto-assignment, SLA monitoring, and owner escalation:\n\n**1. New Ticket Intake (Webhook)**\nTenant submits a form → system generates a ticket ID (TCK-timestamp) → AI classifies urgency (Emergency/High/Normal/Low) and picks a vendor category (Plumber, Electrician, HVAC, etc.) → saves to Google Sheets → routes by urgency:\n- **Emergency**: auto-assigns top vendor (lowest load), emails vendor, Telegram alert, 10-min escalation loop if unacknowledged\n- **High**: alerts owner on Telegram with vendor suggestion, 4-hour escalation loop\n- **Normal/Low**: queued for manual assignment\n\n**2. Vendor Assignment (n8n Form)**\nOwner uses an n8n form to assign a vendor → updates ticket to \"Assigned\" → emails vendor with details + \"Mark as Resolved\" link → increments vendor's active ticket count.\n\n**3. Vendor Resolution (Webhook)**\nVendor clicks \"Mark as Resolved\" → ticket resolved → vendor count decremented → tenant gets confirmation email asking \"Has your problem been solved?\" (Yes/No).\n\n**4. Tenant Confirmation (Webhook)**\nYes → ticket closed. No → ticket reopened → owner alerted on Telegram.\n\n**5. SLA Monitor (Hourly)**\nChecks open tickets → finds overdue ones → escalation alert to owner with suggested vendor.\n\n**6. Daily Queue Digest (9 AM)**\nTelegram digest of all queued tickets with vendor recommendations.\n\n**7. Weekly Owner Report (8 AM)**\nHTML email report with breakdowns by urgency, category, status.\n\n**8. Auto-Close (Hourly)**\nCloses tickets resolved for 48+ hours.\n\n---\n\n## Credentials Needed (4 total)\n\n| # | Credential | Type in n8n | What For |\n|---|-----------|------------|----------|\n| 1 | **OpenAI** | OpenAI API | AI urgency classification (GPT-4o) |\n| 2 | **Google Sheets** | Google Sheets OAuth2 | TICKETS + VENDORS sheets |\n| 3 | **Gmail** | Gmail OAuth2 | Vendor notifications, tenant confirmations, weekly report |\n| 4 | **Telegram Bot** | Telegram API | Owner alerts, escalations, daily digest |\n\n---\n\n## Setup Steps\n\n**Step 1 — Google Sheets (2 tabs)**\nCreate a Google Sheet with:\n- Tab \"TICKETS\": Ticket ID, Created At, Updated At, Tenant Name, Phone, Email, Unit/Property Address, Urgency, Property ID, Category, Description, Status, Assigned Vendor, Vendor Phone, Vendor Email, Assigned At, SLA Deadline, Resolve At, Escalation Count, Owner Notified\n- Tab \"VENDORS\": Vendor Name, Category, Email, Phone, Active Ticket Count, Status\n→ Update Sheet ID in all Google Sheets nodes.\n→ Populate VENDORS tab with your vendor list (name, category, email, phone, status=Active, count=0).\n\n**Step 2 — Telegram Bot**\nCreate a bot via @BotFather → set up a channel/group for maintenance alerts.\n→ Update chat ID in all Telegram nodes.\n\n**Step 3 — Update Webhook URLs**\nUpdate these URLs in email/Telegram templates to match your production n8n domain:\n- Vendor resolve: /webhook/vendor-resolve\n- Tenant confirm: /webhook/tenant-confirm\n- Assign form: /form/assign-vendor\n\n**Step 4 — Weekly Report Email**\nUpdate recipient email in SEND OWNER REPORT node.\n\n**Step 5 — SLA Deadlines**\nDefaults: Emergency=1h, High=4h, Normal=24h, Low=72h. Adjust in the Set node if needed.\n\n**Step 6 — Connect Tenant Form**\nPoint your form to the webhook (path: /maintenance-request). Fields: name, phone, email, property_address, category, description.\n\n**Step 7 — Activate**\nEnable the workflow. Test with a sample ticket for each urgency level.",
+        "height": 2072,
+        "width": 820,
+        "color": 4
+      },
+      "id": "bfd4c380-8956-454e-bcbd-e2982e675bb5",
+      "name": "Setup Guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -7328,
+        192
+      ]
+    }
+  ],
+  "pinData": {
+    "ASSIGN TICKET - UPDATE": [
+      {
+        "json": {
+          "Assigned Vendor": "Karim Uddin",
+          "Assigned At": "2026-11-27T18:13:08.810+06:00",
+          "Status": "Assigned",
+          "Ticket ID": "TCK-20261127175541",
+          "Vendor Email": "karim.plumbing@email.com"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "ASSIGN VENDOR": [
+      {
+        "json": {
+          "Ticket ID": "TCK-20261127175541",
+          "Vendor Name": "Karim Uddin",
+          "Vendor Email": "karim.plumbing@email.com",
+          "submittedAt": "2026-11-27T18:13:07.585+06:00",
+          "formMode": "test",
+          "formQueryParameters": {
+            "Ticket ID": "TCK-20261127175541",
+            "Vendor Name": "Karim Uddin",
+            "Vendor Email": "karim.plumbing@email.com"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "GET TENANT LIST": [
+      {
+        "json": {
+          "row_number": 15,
+          "Ticket ID": "TCK-20261127175541",
+          "Created At ": "2026-11-27T17:55:41.213+06:00",
+          "Updated At": "2026-11-27T17:55:41.216+06:00",
+          "Tenant Name": "Meheraz Hossain",
+          "Phone": 8801869570750,
+          "Email": "meheraz.txt@gmail.com",
+          "Unit/Property Address": "Mirpur 10, Dhaka, Bangladesh - 1216",
+          "Urgency": "High",
+          "Property ID": "PROP-20261127175541237",
+          "Category": "Plumbing",
+          "Description": "Significant leak in kitchen requiring urgent assistance.",
+          "Status": "Assigned",
+          "Assigned Vendor": "Karim Uddin",
+          "Vendor Phone ": "",
+          "Vendor Email": "karim.plumbing@email.com",
+          "Assigned At": "2026-11-27T18:13:08.810+06:00",
+          "SLA Deadline": "2026-11-27T21:55:44.349+06:00",
+          "Resolve At": "",
+          "Escalation Count": 0,
+          "Owner Notified": "Yes",
+          "col_21": ""
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI URGENCY CLASSIFIER",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI URGENCY CLASSIFIER",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TENANT REQUEST FORM": {
+      "main": [
+        [
+          {
+            "node": "NORMALIZE DATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NORMALIZE DATA": {
+      "main": [
+        [
+          {
+            "node": "AI URGENCY CLASSIFIER",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI URGENCY CLASSIFIER": {
+      "main": [
+        [
+          {
+            "node": "SAVE AI OUTPUT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SAVE AI OUTPUT": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "CREATE TICKET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CREATE TICKET": {
+      "main": [
+        [
+          {
+            "node": "SWITCH (URGENCY)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SWITCH (URGENCY)": {
+      "main": [
+        [
+          {
+            "node": "GET ACTIVE VENDORS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GET ACTIVE VENDORS(HIGH)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "UPDATE STATUS - QUEUED",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "UPDATE STATUS - QUEUED LOW",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EMERGENCY ALERT": {
+      "main": [
+        [
+          {
+            "node": "WAIT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET ACTIVE VENDORS": {
+      "main": [
+        [
+          {
+            "node": "FILTER BY CATEGORY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FILTER BY CATEGORY": {
+      "main": [
+        [
+          {
+            "node": "SORT BY LOAD (EMERGENCY)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NOTIFY EMERGENCY VENDOR": {
+      "main": [
+        [
+          {
+            "node": "EMERGENCY ALERT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WAIT": {
+      "main": [
+        [
+          {
+            "node": "LOOKUP TICKET STATUS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LOOKUP TICKET STATUS": {
+      "main": [
+        [
+          {
+            "node": "IF (STILL NOT ASSIGNED)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF (STILL NOT ASSIGNED)": {
+      "main": [
+        [
+          {
+            "node": "ESCALATE TO OWNER",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET ACTIVE VENDORS(HIGH)": {
+      "main": [
+        [
+          {
+            "node": "FILTER BY CATEGORY (HIGH)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FILTER BY CATEGORY (HIGH)": {
+      "main": [
+        [
+          {
+            "node": "SORT BY LOAD (HIGH)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SORT BY LOAD (EMERGENCY)": {
+      "main": [
+        [
+          {
+            "node": "TAKE TOP VENDOR (EMERGENCY)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TAKE TOP VENDOR (EMERGENCY)": {
+      "main": [
+        [
+          {
+            "node": "NOTIFY EMERGENCY VENDOR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SORT BY LOAD (HIGH)": {
+      "main": [
+        [
+          {
+            "node": "TAKE TOP VENDOR (HIGH)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TAKE TOP VENDOR (HIGH)": {
+      "main": [
+        [
+          {
+            "node": "HIGH PRIORITY ALERT1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WAIT1": {
+      "main": [
+        [
+          {
+            "node": "LOOKUP STATUS (HIGH)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF (NOT ASSIGNED - HIGH)1": {
+      "main": [
+        [
+          {
+            "node": "ESCALATE TO OWNER1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ASSIGN TICKET - UPDATE": {
+      "main": [
+        [
+          {
+            "node": "GET TENANT LIST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VENDOR RESOLVE WEBHOOK": {
+      "main": [
+        [
+          {
+            "node": "LOOKUP TICKET FOR RESOLVE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LOOKUP TICKET FOR RESOLVE": {
+      "main": [
+        [
+          {
+            "node": "MARK RESOLVED",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MARK RESOLVED": {
+      "main": [
+        [
+          {
+            "node": "VENDOR RESOLVE RESPONSE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VENDOR RESOLVE RESPONSE": {
+      "main": [
+        [
+          {
+            "node": "GET VENDOR FOR DECREMENT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TENANT CONFIRM WEBHOOK": {
+      "main": [
+        [
+          {
+            "node": "IF (TENANT SAYS YES)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF (TENANT SAYS YES)": {
+      "main": [
+        [
+          {
+            "node": "UPDATE TENANT COFIRMATION",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "UPDATE TENANT COFIRMATION1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPDATE TENANT COFIRMATION": {
+      "main": [
+        [
+          {
+            "node": "TENANT CONFIRM RESPONSE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ESCALATE TO OWNER": {
+      "main": [
+        [
+          {
+            "node": "WAIT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ASSIGN VENDOR": {
+      "main": [
+        [
+          {
+            "node": "ASSIGN TICKET - UPDATE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HIGH PRIORITY ALERT1": {
+      "main": [
+        [
+          {
+            "node": "WAIT1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LOOKUP STATUS (HIGH)": {
+      "main": [
+        [
+          {
+            "node": "IF (NOT ASSIGNED - HIGH)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ESCALATE TO OWNER1": {
+      "main": [
+        [
+          {
+            "node": "WAIT1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET TENANT LIST": {
+      "main": [
+        [
+          {
+            "node": "NOTIFY VENDOR - ASSIGNED",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NOTIFY VENDOR - ASSIGNED": {
+      "main": [
+        [
+          {
+            "node": "GET VENDOR CURRENT COUNT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET VENDOR CURRENT COUNT": {
+      "main": [
+        [
+          {
+            "node": "INCREMENT VENDOR COUNT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET VENDOR FOR DECREMENT": {
+      "main": [
+        [
+          {
+            "node": "DECREMENT VENDOR COUNT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DECREMENT VENDOR COUNT": {
+      "main": [
+        [
+          {
+            "node": "ASK TENANT CONFIRMATION",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET QUEUED TICKETS": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "COMBINE ALL LINES",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GET ACTIVE VENDORS (FOR DIGEST)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET ACTIVE VENDORS (FOR DIGEST)": {
+      "main": [
+        [
+          {
+            "node": "FILTER BY CATEGORY (DIGEST)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FILTER BY CATEGORY (DIGEST)": {
+      "main": [
+        [
+          {
+            "node": "SORT BY LOAD (DIGEST)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SORT BY LOAD (DIGEST)": {
+      "main": [
+        [
+          {
+            "node": "TAKE TOP VENDOR (DIGEST)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TAKE TOP VENDOR (DIGEST)": {
+      "main": [
+        [
+          {
+            "node": "BUILD DIGEST LINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BUILD DIGEST LINE": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "COMBINE ALL LINES": {
+      "main": [
+        [
+          {
+            "node": "SEND DAILY DIGEST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DAILY QUEUE DIGEST": {
+      "main": [
+        [
+          {
+            "node": "GET QUEUED TICKETS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SLA MONITOR": {
+      "main": [
+        [
+          {
+            "node": "GET All TICKETS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET All TICKETS": {
+      "main": [
+        [
+          {
+            "node": "EXCLUDE RESOLVED CLOSED",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EXCLUDE RESOLVED CLOSED": {
+      "main": [
+        [
+          {
+            "node": "FIND OVERDUE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FIND OVERDUE": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "GET ACTIVE VENDORS FOR SLA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ESCALATION ALERT": {
+      "main": [
+        [
+          {
+            "node": "INCREMENT ESCALATION COUNT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "INCREMENT ESCALATION COUNT": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OWNER WEEKLY REPORT": {
+      "main": [
+        [
+          {
+            "node": "GET WEEK TICKETS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET WEEK TICKETS": {
+      "main": [
+        [
+          {
+            "node": "FILTER LAST 7 DAYS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FILTER LAST 7 DAYS": {
+      "main": [
+        [
+          {
+            "node": "BUILD REPORT HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BUILD REPORT HTML": {
+      "main": [
+        [
+          {
+            "node": "SEND OWNER REPORT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AUTO CLOSE MONITOR": {
+      "main": [
+        [
+          {
+            "node": "GET RESOLVED TICKETS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET RESOLVED TICKETS": {
+      "main": [
+        [
+          {
+            "node": "OLDER THAN 48H",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OLDER THAN 48H": {
+      "main": [
+        [
+          {
+            "node": "AUTO CLOSE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPDATE TENANT COFIRMATION1": {
+      "main": [
+        [
+          {
+            "node": "GET TENANT INFO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET TENANT INFO": {
+      "main": [
+        [
+          {
+            "node": "COMPLAIN TO MANAGER",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET ACTIVE VENDORS FOR SLA": {
+      "main": [
+        [
+          {
+            "node": "MATCH VENDOR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MATCH VENDOR": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "ESCALATION ALERT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "008b5346-d8b2-497b-966c-8d95998d225f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1d53558c22033b5a503ea23f2f91ceeb975dfadcffcc695f88ac8ff607e8b782"
+  },
+  "nodeGroups": [],
+  "id": "nn6DN8PqPfo2YSwb",
+  "tags": []
+}
